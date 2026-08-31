@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Santa Clara University School of Law's Internal Moot Court Competition — Wireframe</title>
+<title>SCU Moot Court Competition — Wireframe</title>
 <style>
   :root{
     --scu-red:#A32035;
@@ -177,6 +177,38 @@
     text-align:center; padding:26px; font-size:12px; color:var(--stone);
     border-top:1px solid var(--border); margin-top:20px;
   }
+
+  /* ---- first-login / force-change banner ---- */
+  .force-banner{
+    background:#fdeceb; border:1px solid #f2c2c2; color:var(--bronco-red);
+    border-radius:6px; padding:12px 16px; font-size:13px; margin-bottom:20px;
+    display:flex; justify-content:space-between; align-items:center; gap:12px;
+  }
+  .force-banner a{ font-weight:600; white-space:nowrap; }
+
+  /* ---- account settings / change password ---- */
+  .settings-row{ display:flex; gap:12px; }
+  .settings-row .field{ flex:1; }
+  .btn-secondary{
+    background:#fff; color:var(--scu-red); border:1px solid var(--scu-red);
+    padding:10px 18px; border-radius:4px; font-size:13px; font-weight:500; cursor:pointer;
+  }
+  .btn-secondary:hover{ background:#fdeceb; }
+
+  /* ---- organizer console ---- */
+  .org-table{ width:100%; border-collapse:collapse; font-size:13px; }
+  .org-table th{
+    text-align:left; font-size:11px; color:var(--stone); font-weight:500;
+    padding:8px 6px; border-bottom:1px solid var(--border);
+  }
+  .org-table td{ padding:8px 6px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  .org-table input[type=number]{
+    width:64px; padding:6px 8px; border:1px solid var(--border); border-radius:4px; font-size:13px;
+  }
+  .org-badge{
+    font-size:11px; font-weight:600; padding:2px 8px; border-radius:20px; background:var(--stone-light); color:var(--stone);
+  }
+  .case-caption{ font-style:italic; }
 </style>
 </head>
 <body>
@@ -188,12 +220,13 @@
 
 <header class="site">
   <div class="site-title">
-    <span class="eyebrow">Santa Clara School of Law · Moot Court Competition</span>
-    <h1> Patel et. al. v. United States et. al.</h1>
+    <span class="eyebrow">Santa Clara Law · Moot Court Board</span>
+    <h1>Moot Court Competition</h1>
   </div>
   <nav class="tabs">
     <button class="active" onclick="showView('login', this)">Login</button>
     <button onclick="showView('dashboard', this)">Competitor dashboard</button>
+    <button onclick="showView('organizer', this)">Organizer console</button>
     <button onclick="showView('judges', this)">Judges</button>
   </nav>
 </header>
@@ -210,22 +243,22 @@
           <p class="tag">For registered competitors and organizers</p>
 
           <div class="role-toggle">
-            <button class="active">Competitor</button>
-            <button>Organizer / admin</button>
+            <button id="role-competitor" class="active" onclick="setRole('competitor', this)">Competitor</button>
+            <button id="role-organizer" onclick="setRole('organizer', this)">Organizer / admin</button>
           </div>
 
           <div class="field">
             <label>SCU email address</label>
-            <input type="email" placeholder="jstudent@scu.edu">
+            <input id="login-email" type="email" placeholder="jstudent@scu.edu">
           </div>
           <div class="field">
             <label>Password</label>
-            <input type="password" placeholder="••••••••">
+            <input id="login-password" type="password" placeholder="••••••••">
           </div>
-          <button class="btn-primary">Sign in</button>
+          <button class="btn-primary" onclick="signIn()">Sign in</button>
           <div class="login-foot">
             Forgot your password? Contact the Moot Court Board.<br>
-            Judges: — <a href="#" onclick="showView('judges', document.querySelectorAll('nav button')[2]); return false;"> Please visit the judges page</a>.
+            Judges do not need an account — <a href="#" onclick="showView('judges', document.querySelectorAll('nav button')[3]); return false;">visit the judges page</a>.
           </div>
 
           <div class="privacy-note">
@@ -238,12 +271,18 @@
 
   <!-- ===================== COMPETITOR DASHBOARD ===================== -->
   <section id="dashboard" class="view">
+    <div id="force-change-banner" class="force-banner">
+      <span>This is your first time signing in. For security, please set a new password before continuing.</span>
+      <a href="#" onclick="document.getElementById('settings-card').scrollIntoView({behavior:'smooth'}); return false;">Change password →</a>
+    </div>
+
     <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
       <div>
         <div class="sub" style="margin-bottom:2px;">Welcome back</div>
-        <h2 style="margin:0;">Sample Student</h2>
+        <h2 style="margin:0;">Jordan Alvarez</h2>
+        <div class="sub case-caption" style="margin-top:6px;">Patel et al. v. United States et al.</div>
       </div>
-      <span class="badge live">Preliminary Round 1 - November 12</span>
+      <span class="badge live">Round 2 · in progress</span>
     </div>
 
     <div class="dash-grid">
@@ -255,6 +294,9 @@
           <div class="assignment-row">
             <div><div class="label">Round</div><div class="value">Round 2 — Quarterfinal</div></div>
             <span class="badge live">Live</span>
+          </div>
+          <div class="assignment-row">
+            <div><div class="label">Case</div><div class="value case-caption">Patel et al. v. United States et al.</div></div>
           </div>
           <div class="assignment-row">
             <div><div class="label">Room</div><div class="value">Bergin Hall, Courtroom 3</div></div>
@@ -328,7 +370,86 @@
             Scores are entered by organizers after each round and released once all ballots for the round are confirmed.
           </p>
         </div>
+
+        <div class="card" id="settings-card">
+          <h2>Account settings</h2>
+          <div class="sub">Change your password at any time — no need to wait for a reset email</div>
+          <div class="field">
+            <label>Current password</label>
+            <input type="password" placeholder="••••••••">
+          </div>
+          <div class="settings-row">
+            <div class="field">
+              <label>New password</label>
+              <input type="password" placeholder="At least 8 characters">
+            </div>
+            <div class="field">
+              <label>Confirm new password</label>
+              <input type="password" placeholder="Re-enter new password">
+            </div>
+          </div>
+          <button class="btn-secondary" onclick="document.getElementById('force-change-banner').style.display='none'; alert('Password updated. (Demo only — no backend connected.)')">Update password</button>
+        </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ===================== ORGANIZER CONSOLE ===================== -->
+  <section id="organizer" class="view">
+    <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div class="sub" style="margin-bottom:2px;">Signed in as</div>
+        <h2 style="margin:0;">hmc@scu.edu</h2>
+      </div>
+      <span class="org-badge">Organizer · score entry authorized</span>
+    </div>
+
+    <div class="card">
+      <h2>Enter ballot scores</h2>
+      <div class="sub">Round 2 — Quarterfinal · <span class="case-caption">Patel et al. v. United States et al.</span> · Bergin Hall, Courtroom 3</div>
+
+      <table class="org-table">
+        <thead>
+          <tr><th>Competitor</th><th>Side</th><th>Judge 1</th><th>Judge 2</th><th>Judge 3</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Jordan Alvarez</td>
+            <td>Petitioner</td>
+            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
+            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
+            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
+            <td><button class="btn-secondary" style="padding:6px 12px;">Save</button></td>
+          </tr>
+          <tr>
+            <td>Morgan Reyes</td>
+            <td>Respondent</td>
+            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
+            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
+            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
+            <td><button class="btn-secondary" style="padding:6px 12px;">Save</button></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="tiebreak-note">
+        Scores save per competitor as soon as all three judge fields are filled. Mean and mode are calculated automatically and stay hidden from competitors until you publish the round.
+      </div>
+    </div>
+
+    <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <h2 style="margin-bottom:4px;">Round 1 — Preliminary</h2>
+        <div class="sub" style="margin-bottom:0;">All ballots entered</div>
+      </div>
+      <button class="btn-primary" style="width:auto;">Publish results to competitors</button>
+    </div>
+
+    <div class="card">
+      <h2>Access note</h2>
+      <p style="font-size:13px;color:var(--stone);margin:0;">
+        Only accounts flagged with the organizer role — currently <strong>hmc@scu.edu</strong> — can view this console or write to the ballots table. Competitor accounts never see this page, even if they guess the URL, because the backend checks the signed-in user's role on every request, not just the frontend navigation.
+      </p>
     </div>
   </section>
 
@@ -341,7 +462,7 @@
         We're looking for attorneys, alumni, and faculty to serve as judges for oral arguments.
         No prior moot court experience is required — we provide the bench memo and scoring rubric in advance.
       </p>
-      <a class="btn-cta" href="https://forms.gle/ycxdjWCjHxA4SGk5A" target="_blank" rel="noopener">
+      <a class="btn-cta" href="https://docs.google.com/forms/d/e/EXAMPLE_FORM_ID/viewform" target="_blank" rel="noopener">
         Express interest →
       </a>
     </div>
@@ -392,15 +513,32 @@
 </main>
 
 <footer class="site">
-  Santa Clara University School of Law · Moot Court Board · Questions? Contact hmc@scu.edu
+  Santa Clara University School of Law · Moot Court Board · Questions? Contact mootcourt@scu.edu
 </footer>
 
 <script>
+let selectedRole = 'competitor';
+
 function showView(id, btn){
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   document.querySelectorAll('nav.tabs button').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+function setRole(role, btn){
+  selectedRole = role;
+  document.getElementById('role-competitor').classList.toggle('active', role === 'competitor');
+  document.getElementById('role-organizer').classList.toggle('active', role === 'organizer');
+}
+
+function signIn(){
+  const navButtons = document.querySelectorAll('nav.tabs button');
+  if (selectedRole === 'organizer') {
+    showView('organizer', navButtons[2]);
+  } else {
+    showView('dashboard', navButtons[1]);
+  }
 }
 </script>
 
