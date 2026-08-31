@@ -224,10 +224,8 @@
     <h1>Moot Court Competition</h1>
   </div>
   <nav class="tabs">
-    <button class="active" onclick="showView('login', this)">Login</button>
-    <button onclick="showView('dashboard', this)">Competitor dashboard</button>
-    <button onclick="showView('organizer', this)">Organizer console</button>
-    <button onclick="showView('judges', this)">Judges</button>
+    <button id="nav-login" class="active" onclick="showView('login', this)">Competitor Login</button>
+    <button id="nav-judges" onclick="showView('judges', this)">Judges Information</button>
   </nav>
 </header>
 
@@ -258,7 +256,7 @@
           <button class="btn-primary" onclick="signIn()">Sign in</button>
           <div class="login-foot">
             Forgot your password? Contact the Moot Court Board.<br>
-            Judges do not need an account — <a href="#" onclick="showView('judges', document.querySelectorAll('nav button')[3]); return false;">visit the judges page</a>.
+            Judges do not need an account — <a href="#" onclick="showView('judges', document.getElementById('nav-judges')); return false;">visit the judges page</a>.
           </div>
 
           <div class="privacy-note">
@@ -282,7 +280,10 @@
         <h2 style="margin:0;">Jordan Alvarez</h2>
         <div class="sub case-caption" style="margin-top:6px;">Patel et al. v. United States et al.</div>
       </div>
-      <span class="badge live">Round 2 · in progress</span>
+      <div style="text-align:right;">
+        <span class="badge live">Round 2 · in progress</span>
+        <div style="margin-top:10px;"><a href="#" style="font-size:12px;" onclick="showView('login', document.getElementById('nav-login')); return false;">Log out</a></div>
+      </div>
     </div>
 
     <div class="dash-grid">
@@ -401,7 +402,10 @@
         <div class="sub" style="margin-bottom:2px;">Signed in as</div>
         <h2 style="margin:0;">hmc@scu.edu</h2>
       </div>
-      <span class="org-badge">Organizer · score entry authorized</span>
+      <div style="text-align:right;">
+        <span class="org-badge">Organizer · score entry authorized</span>
+        <div style="margin-top:10px;"><a href="#" style="font-size:12px;" onclick="showView('login', document.getElementById('nav-login')); return false;">Log out</a></div>
+      </div>
     </div>
 
     <div class="card">
@@ -518,6 +522,8 @@
 
 <script>
 let selectedRole = 'competitor';
+const ORGANIZER_EMAIL = 'hmc@scu.edu';
+const ORGANIZER_PASSWORD = 'privacyr@ghtsfall26';
 
 function showView(id, btn){
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -533,12 +539,19 @@ function setRole(role, btn){
 }
 
 function signIn(){
-  const navButtons = document.querySelectorAll('nav.tabs button');
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const password = document.getElementById('login-password').value;
+
   if (selectedRole === 'organizer') {
-    showView('organizer', navButtons[2]);
-  } else {
-    showView('dashboard', navButtons[1]);
+    if (email === ORGANIZER_EMAIL && password === ORGANIZER_PASSWORD) {
+      showView('organizer', null);
+    } else {
+      alert('Incorrect organizer email or password. (Demo credential: hmc@scu.edu)');
+    }
+    return;
   }
+
+  showView('dashboard', null);
 }
 </script>
 
