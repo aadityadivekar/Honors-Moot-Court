@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCU Moot Court Competition — Wireframe</title>
+<style>
+  :root{
+    --scu-red:#A32035;
+    --bronco-red:#862633;
+    --stone:#758592;
+    --stone-light:#eef1f3;
+    --black:#0A0A0A;
+    --white:#FFFFFF;
+    --success:#2E7D4F;
+    --border:#dfe3e6;
+    --font-sans:'Avenir Next','Century Gothic',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --font-serif:'Minion Pro',Georgia,'Times New Roman',serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:var(--font-sans); color:var(--black);
+    background:#f6f5f2; line-height:1.5;
+  }
+  a{color:var(--scu-red);}
+
+  /* ---- top brand bar ---- */
+  .brand-bar{
+    background:var(--scu-red); color:#fff; padding:10px 32px;
+    display:flex; align-items:center; justify-content:space-between; font-size:13px;
+    letter-spacing:.02em;
+  }
+  .brand-bar span.dept{ opacity:.9; }
+
+  header.site{
+    background:#fff; border-bottom:1px solid var(--border);
+    padding:18px 32px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .site-title{ display:flex; flex-direction:column; }
+  .site-title .eyebrow{ font-size:12px; color:var(--stone); font-weight:500; }
+  .site-title h1{
+    font-family:var(--font-serif); font-size:26px; margin:2px 0 0; font-weight:600;
+    color:var(--black);
+  }
+  nav.tabs{ display:flex; gap:6px; }
+  nav.tabs button{
+    font-family:var(--font-sans); font-size:14px; font-weight:500;
+    background:none; border:1px solid transparent; padding:9px 16px; border-radius:4px;
+    cursor:pointer; color:var(--stone);
+  }
+  nav.tabs button.active{
+    background:var(--stone-light); color:var(--scu-red); border-color:var(--border);
+  }
+
+  main{ max-width:1080px; margin:0 auto; padding:36px 24px 80px; }
+  .view{ display:none; }
+  .view.active{ display:block; }
+
+  /* ---- shared card ---- */
+  .card{
+    background:#fff; border:1px solid var(--border); border-radius:6px;
+    padding:24px 26px; margin-bottom:20px;
+  }
+  .card h2{
+    font-family:var(--font-serif); font-size:19px; margin:0 0 4px; color:var(--black);
+  }
+  .card .sub{ color:var(--stone); font-size:13px; margin-bottom:16px; }
+
+  /* ---- LOGIN VIEW ---- */
+  .login-wrap{
+    display:flex; justify-content:center; padding-top:40px;
+  }
+  .login-card{
+    width:380px; background:#fff; border:1px solid var(--border); border-radius:8px;
+    padding:0; overflow:hidden;
+  }
+  .login-card .top-stripe{ height:6px; background:var(--scu-red); }
+  .login-card .inner{ padding:32px 30px 28px; }
+  .login-card h2{ font-family:var(--font-serif); font-size:22px; margin:0 0 6px; }
+  .login-card p.tag{ color:var(--stone); font-size:13px; margin:0 0 24px; }
+  .field{ margin-bottom:16px; }
+  .field label{ display:block; font-size:12px; font-weight:500; color:var(--stone); margin-bottom:5px; }
+  .field input{
+    width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:4px;
+    font-size:14px; font-family:var(--font-sans);
+  }
+  .btn-primary{
+    width:100%; background:var(--scu-red); color:#fff; border:none; padding:11px;
+    border-radius:4px; font-size:14px; font-weight:500; cursor:pointer; margin-top:6px;
+  }
+  .btn-primary:hover{ background:var(--bronco-red); }
+  .login-foot{ margin-top:18px; font-size:12px; color:var(--stone); text-align:center; }
+  .role-toggle{ display:flex; gap:8px; margin-bottom:20px; }
+  .role-toggle button{
+    flex:1; padding:8px; font-size:12px; font-weight:500; border:1px solid var(--border);
+    background:var(--stone-light); border-radius:4px; cursor:pointer; color:var(--stone);
+  }
+  .role-toggle button.active{ background:var(--scu-red); color:#fff; border-color:var(--scu-red); }
+  .privacy-note{
+    display:flex; gap:8px; align-items:flex-start; background:var(--stone-light);
+    border:1px solid var(--border); border-radius:4px; padding:10px 12px; font-size:12px;
+    color:var(--stone); margin-top:18px;
+  }
+
+  /* ---- DASHBOARD VIEW ---- */
+  .dash-grid{ display:grid; grid-template-columns:1.3fr 1fr; gap:20px; }
+  .badge{
+    display:inline-block; font-size:11px; font-weight:600; padding:3px 9px;
+    border-radius:20px; letter-spacing:.02em;
+  }
+  .badge.live{ background:#fdeceb; color:var(--scu-red); }
+  .badge.published{ background:#e7f3ec; color:var(--success); }
+  .badge.pending{ background:var(--stone-light); color:var(--stone); }
+
+  .assignment-row{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:14px 0; border-bottom:1px solid var(--border);
+  }
+  .assignment-row:last-child{ border-bottom:none; }
+  .assignment-row .label{ font-size:12px; color:var(--stone); }
+  .assignment-row .value{ font-size:15px; font-weight:500; }
+
+  table.scores{ width:100%; border-collapse:collapse; font-size:13px; }
+  table.scores th{
+    text-align:left; font-size:11px; text-transform:none; color:var(--stone);
+    font-weight:500; padding:8px 6px; border-bottom:1px solid var(--border);
+  }
+  table.scores td{ padding:9px 6px; border-bottom:1px solid var(--border); }
+  table.scores tr:last-child td{ border-bottom:none; }
+  .stat-pair{ display:flex; gap:22px; margin:14px 0 6px; }
+  .stat{ }
+  .stat .num{ font-family:var(--font-serif); font-size:28px; color:var(--scu-red); }
+  .stat .lbl{ font-size:11px; color:var(--stone); text-transform:uppercase; letter-spacing:.04em; }
+  .tiebreak-note{
+    font-size:12px; color:var(--stone); background:var(--stone-light); border-radius:4px;
+    padding:10px 12px; margin-top:14px; line-height:1.5;
+  }
+  .announce-item{ padding:12px 0; border-bottom:1px solid var(--border); }
+  .announce-item:last-child{ border-bottom:none; }
+  .announce-item .time{ font-size:11px; color:var(--stone); }
+  .announce-item .msg{ font-size:14px; margin-top:3px; }
+  .lock-note{
+    display:flex; gap:8px; align-items:center; font-size:12px; color:var(--stone);
+    margin-top:8px;
+  }
+
+  /* ---- JUDGES VIEW ---- */
+  .judge-hero{
+    background:var(--black); color:#fff; border-radius:8px; padding:48px 40px;
+    margin-bottom:24px; position:relative; overflow:hidden;
+  }
+  .judge-hero:before{
+    content:""; position:absolute; right:-60px; top:-60px; width:220px; height:220px;
+    border:1px solid rgba(255,255,255,.15); border-radius:50%;
+  }
+  .judge-hero .eyebrow{ color:#e7b8c0; font-size:13px; font-weight:500; }
+  .judge-hero h2{
+    font-family:var(--font-serif); font-size:34px; margin:8px 0 14px; max-width:560px;
+    font-weight:600; line-height:1.2;
+  }
+  .judge-hero p{ max-width:520px; color:#d8d8d8; font-size:15px; margin-bottom:26px; }
+  .btn-cta{
+    display:inline-block; background:var(--scu-red); color:#fff; padding:13px 26px;
+    border-radius:4px; font-size:14px; font-weight:600; text-decoration:none;
+  }
+  .btn-cta:hover{ background:var(--bronco-red); }
+  .info-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-bottom:20px; }
+  .info-card{ background:#fff; border:1px solid var(--border); border-radius:6px; padding:20px; }
+  .info-card .icon-label{ font-size:11px; color:var(--stone); text-transform:uppercase; letter-spacing:.04em; margin-bottom:8px; }
+  .info-card h3{ font-size:16px; margin:0 0 8px; font-family:var(--font-serif); }
+  .info-card p{ font-size:13px; color:#333; margin:0; }
+  .faq-item{ padding:16px 0; border-bottom:1px solid var(--border); }
+  .faq-item:last-child{ border-bottom:none; }
+  .faq-item h4{ margin:0 0 6px; font-size:14px; }
+  .faq-item p{ margin:0; font-size:13px; color:#333; }
+  footer.site{
+    text-align:center; padding:26px; font-size:12px; color:var(--stone);
+    border-top:1px solid var(--border); margin-top:20px;
+  }
+</style>
+</head>
+<body>
+
+<div class="brand-bar">
+  <span>SANTA CLARA LAW</span>
+  <span class="dept">Moot Court Competition</span>
+</div>
+
+<header class="site">
+  <div class="site-title">
+    <span class="eyebrow">Santa Clara Law · Moot Court Board</span>
+    <h1>Moot Court Competition</h1>
+  </div>
+  <nav class="tabs">
+    <button class="active" onclick="showView('login', this)">Login</button>
+    <button onclick="showView('dashboard', this)">Competitor dashboard</button>
+    <button onclick="showView('judges', this)">Judges</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ===================== LOGIN VIEW ===================== -->
+  <section id="login" class="view active">
+    <div class="login-wrap">
+      <div class="login-card">
+        <div class="top-stripe"></div>
+        <div class="inner">
+          <h2>Sign in</h2>
+          <p class="tag">For registered competitors and organizers</p>
+
+          <div class="role-toggle">
+            <button class="active">Competitor</button>
+            <button>Organizer / admin</button>
+          </div>
+
+          <div class="field">
+            <label>SCU email address</label>
+            <input type="email" placeholder="jstudent@scu.edu">
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input type="password" placeholder="••••••••">
+          </div>
+          <button class="btn-primary">Sign in</button>
+          <div class="login-foot">
+            Forgot your password? Contact the Moot Court Board.<br>
+            Judges do not need an account — <a href="#" onclick="showView('judges', document.querySelectorAll('nav button')[2]); return false;">visit the judges page</a>.
+          </div>
+
+          <div class="privacy-note">
+            🔒 Your account only shows your own room assignments and scores. Competitors cannot view other teams' results.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== COMPETITOR DASHBOARD ===================== -->
+  <section id="dashboard" class="view">
+    <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div class="sub" style="margin-bottom:2px;">Welcome back</div>
+        <h2 style="margin:0;">Jordan Alvarez</h2>
+      </div>
+      <span class="badge live">Round 2 · in progress</span>
+    </div>
+
+    <div class="dash-grid">
+      <!-- LEFT COLUMN -->
+      <div>
+        <div class="card">
+          <h2>Room assignment</h2>
+          <div class="sub">Updates automatically as rounds are released</div>
+          <div class="assignment-row">
+            <div><div class="label">Round</div><div class="value">Round 2 — Quarterfinal</div></div>
+            <span class="badge live">Live</span>
+          </div>
+          <div class="assignment-row">
+            <div><div class="label">Room</div><div class="value">Bergin Hall, Courtroom 3</div></div>
+          </div>
+          <div class="assignment-row">
+            <div><div class="label">Call time</div><div class="value">1:30 PM</div></div>
+          </div>
+          <div class="assignment-row">
+            <div><div class="label">Side</div><div class="value">Petitioner</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Round updates</h2>
+          <div class="sub">Posted by competition organizers</div>
+          <div class="announce-item">
+            <div class="time">Today, 12:40 PM</div>
+            <div class="msg">Round 2 room assignments are posted. Please arrive 15 minutes before your call time.</div>
+          </div>
+          <div class="announce-item">
+            <div class="time">Today, 9:05 AM</div>
+            <div class="msg">Round 1 results have been published — check your Results panel.</div>
+          </div>
+          <div class="announce-item">
+            <div class="time">Yesterday, 4:15 PM</div>
+            <div class="msg">Reminder: bench memos are due before your assigned round begins.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div>
+        <div class="card">
+          <h2>My results</h2>
+          <div class="sub">Round 1 · Petitioner</div>
+          <span class="badge published">Published</span>
+
+          <div class="stat-pair">
+            <div class="stat">
+              <div class="num">7.7</div>
+              <div class="lbl">Mean score</div>
+            </div>
+            <div class="stat">
+              <div class="num">8.0</div>
+              <div class="lbl">Mode score</div>
+            </div>
+          </div>
+
+          <table class="scores">
+            <thead>
+              <tr><th>Judge</th><th>Score</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Judge 1</td><td>8.0</td></tr>
+              <tr><td>Judge 2</td><td>8.0</td></tr>
+              <tr><td>Judge 3</td><td>7.0</td></tr>
+            </tbody>
+          </table>
+
+          <div class="tiebreak-note">
+            <strong>Tie-break rule:</strong> if two competitors are tied after mean/mode, the panel's higher set of three scores (ranked highest to lowest) determines the advancing competitor.
+          </div>
+
+          <div class="lock-note">🔒 Visible to you only — no other competitor or team can see this panel.</div>
+        </div>
+
+        <div class="card">
+          <h2>Round 2 results</h2>
+          <span class="badge pending">Not yet published</span>
+          <p style="font-size:13px;color:var(--stone);margin-top:12px;">
+            Scores are entered by organizers after each round and released once all ballots for the round are confirmed.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== JUDGES VIEW ===================== -->
+  <section id="judges" class="view">
+    <div class="judge-hero">
+      <div class="eyebrow">Volunteer with Santa Clara Law</div>
+      <h2>Judge the Moot Court Competition</h2>
+      <p>
+        We're looking for attorneys, alumni, and faculty to serve as judges for oral arguments.
+        No prior moot court experience is required — we provide the bench memo and scoring rubric in advance.
+      </p>
+      <a class="btn-cta" href="https://docs.google.com/forms/d/e/EXAMPLE_FORM_ID/viewform" target="_blank" rel="noopener">
+        Express interest →
+      </a>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="icon-label">Commitment</div>
+        <h3>One round, ~2 hours</h3>
+        <p>Judges are assigned to a single round of oral arguments and typically serve on a three-judge panel.</p>
+      </div>
+      <div class="info-card">
+        <div class="icon-label">What you'll do</div>
+        <h3>Score and question</h3>
+        <p>Ask questions during oral argument and score each competitor using the provided rubric.</p>
+      </div>
+      <div class="info-card">
+        <div class="icon-label">No account needed</div>
+        <h3>Simple sign-up</h3>
+        <p>Express interest through the form below — a member of the Moot Court Board will follow up with logistics by email.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Frequently asked questions</h2>
+      <div class="faq-item">
+        <h4>Do I need to create an account?</h4>
+        <p>No. Judges do not need to log in anywhere on this site. Fill out the interest form, and our team will email you directly with your assignment, room, and materials.</p>
+      </div>
+      <div class="faq-item">
+        <h4>What if I've never judged moot court before?</h4>
+        <p>That's fine — we'll send a short scoring guide and bench memo ahead of your round, and a member of the Moot Court Board will be on hand to answer questions.</p>
+      </div>
+      <div class="faq-item">
+        <h4>How are scores used?</h4>
+        <p>Each judge scores independently. Competitors are ranked using the mean and mode of their panel's three scores, with a documented tie-break rule if needed.</p>
+      </div>
+    </div>
+
+    <div class="card" style="text-align:center;">
+      <h2 style="margin-bottom:8px;">Ready to sign up?</h2>
+      <p style="color:var(--stone);font-size:13px;margin-bottom:18px;">Takes about two minutes.</p>
+      <a class="btn-cta" href="https://docs.google.com/forms/d/e/EXAMPLE_FORM_ID/viewform" target="_blank" rel="noopener">
+        Express interest →
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site">
+  Santa Clara University School of Law · Moot Court Board · Questions? Contact mootcourt@scu.edu
+</footer>
+
+<script>
+function showView(id, btn){
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+</script>
+
+</body>
+</html>
