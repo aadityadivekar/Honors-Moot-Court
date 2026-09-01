@@ -656,7 +656,18 @@
 // ---- Connect to your Supabase project ----
 const SUPABASE_URL = 'https://bfurbnjvilmgtfhfobzw.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_fUXqENSPZZIphTFRTY6IiQ_fY-qWHUi';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Created lazily (only when actually needed) so a failed/blocked CDN load
+// can't break basic page navigation like tabs and the role toggle.
+let _supabase = null;
+function getSupabase(){
+  if (_supabase) return _supabase;
+  if (!window.supabase) {
+    throw new Error('Could not load the Supabase library. Check your internet connection, or that cdn.jsdelivr.net is not blocked by a firewall/ad blocker, then reload the page.');
+  }
+  _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  return _supabase;
+}
 
 let selectedRole = 'competitor';
 
@@ -679,6 +690,14 @@ async function signIn(){
 
   if (!email || !password) {
     alert('Enter both an email address and a password.');
+    return;
+  }
+
+  let supabase;
+  try {
+    supabase = getSupabase();
+  } catch (e) {
+    alert(e.message);
     return;
   }
 
@@ -718,7 +737,11 @@ async function signIn(){
 }
 
 async function signOut(){
-  await supabase.auth.signOut();
+  try {
+    await getSupabase().auth.signOut();
+  } catch (e) {
+    // even if Supabase never loaded, still let them get back to the login screen
+  }
   showView('login', document.getElementById('nav-login'));
 }
 
@@ -732,6 +755,14 @@ async function updatePassword(){
   }
   if (newPassword !== confirmPassword) {
     alert('New password and confirmation do not match.');
+    return;
+  }
+
+  let supabase;
+  try {
+    supabase = getSupabase();
+  } catch (e) {
+    alert(e.message);
     return;
   }
 
