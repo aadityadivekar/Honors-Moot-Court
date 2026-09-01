@@ -40,7 +40,7 @@
   .site-title .eyebrow{ font-size:12px; color:var(--stone); font-weight:500; }
   .site-title h1{
     font-family:var(--font-serif); font-size:26px; margin:2px 0 0; font-weight:600;
-    color:var(--black);
+    color:var(--black); font-style:italic;
   }
   nav.tabs{ display:flex; gap:6px; }
   nav.tabs button{
@@ -50,6 +50,14 @@
   }
   nav.tabs button.active{
     background:var(--stone-light); color:var(--scu-red); border-color:var(--border);
+  }
+
+  /* ---- mobile header: stack signature + case name above a full-width nav row ---- */
+  @media (max-width: 640px){
+    header.site{ flex-direction:column; align-items:flex-start; gap:14px; padding:16px 20px; }
+    .site-title h1{ font-size:21px; }
+    nav.tabs{ width:100%; }
+    nav.tabs button{ flex:1; text-align:center; padding:10px 8px; }
   }
 
   main{ max-width:1080px; margin:0 auto; padding:36px 24px 80px; }
@@ -129,7 +137,7 @@
   table.scores tr:last-child td{ border-bottom:none; }
   .stat-pair{ display:flex; gap:22px; margin:14px 0 6px; }
   .stat{ }
-  .stat .num{ font-family:var(--font-serif); font-size:28px; color:var(--scu-red); }
+  .stat .num{ font-family:var(--font-serif); font-size:28px; color:var(--black); }
   .stat .lbl{ font-size:11px; color:var(--stone); text-transform:uppercase; letter-spacing:.04em; }
   .tiebreak-note{
     font-size:12px; color:var(--stone); background:var(--stone-light); border-radius:4px;
@@ -173,6 +181,24 @@
   .faq-item:last-child{ border-bottom:none; }
   .faq-item h4{ margin:0 0 6px; font-size:14px; }
   .faq-item p{ margin:0; font-size:13px; color:#333; }
+
+  /* ---- accordion dropdowns (Parking Information / Rules) ---- */
+  details.accordion{
+    background:#fff; border:1px solid var(--border); border-radius:6px;
+    margin-bottom:14px; overflow:hidden;
+  }
+  details.accordion summary{
+    list-style:none; cursor:pointer; padding:16px 20px; font-family:var(--font-serif);
+    font-size:16px; font-weight:600; display:flex; justify-content:space-between; align-items:center;
+  }
+  details.accordion summary::-webkit-details-marker{ display:none; }
+  details.accordion summary:after{
+    content:"+"; font-family:var(--font-sans); font-size:18px; color:var(--scu-red); font-weight:400;
+  }
+  details.accordion[open] summary:after{ content:"–"; }
+  details.accordion .accordion-body{
+    padding:0 20px 18px; font-size:13px; color:#333; line-height:1.6;
+  }
   footer.site{
     text-align:center; padding:26px; font-size:12px; color:var(--stone);
     border-top:1px solid var(--border); margin-top:20px;
@@ -276,13 +302,12 @@
 
     <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
       <div>
-        <div class="sub" style="margin-bottom:2px;">Welcome back</div>
+        <div class="sub" style="margin-bottom:2px;">Welcome back,</div>
         <h2 style="margin:0;">Jordan Alvarez</h2>
         <div class="sub case-caption" style="margin-top:6px;">Patel et al. v. United States et al.</div>
       </div>
       <div style="text-align:right;">
-        <span class="badge live">Round 2 · in progress</span>
-        <div style="margin-top:10px;"><a href="#" style="font-size:12px;" onclick="showView('login', document.getElementById('nav-login')); return false;">Log out</a></div>
+        <a href="#" style="font-size:15px;font-weight:500;" onclick="showView('login', document.getElementById('nav-login')); return false;">Log out</a>
       </div>
     </div>
 
@@ -290,17 +315,13 @@
       <!-- LEFT COLUMN -->
       <div>
         <div class="card">
-          <h2>Room assignment</h2>
+          <h2>Preliminary Round, Nov 12</h2>
           <div class="sub">Updates automatically as rounds are released</div>
-          <div class="assignment-row">
-            <div><div class="label">Round</div><div class="value">Round 2 — Quarterfinal</div></div>
-            <span class="badge live">Live</span>
-          </div>
           <div class="assignment-row">
             <div><div class="label">Case</div><div class="value case-caption">Patel et al. v. United States et al.</div></div>
           </div>
           <div class="assignment-row">
-            <div><div class="label">Room</div><div class="value">Bergin Hall, Courtroom 3</div></div>
+            <div><div class="label">Room</div><div class="value">Charney 106</div></div>
           </div>
           <div class="assignment-row">
             <div><div class="label">Call time</div><div class="value">1:30 PM</div></div>
@@ -311,19 +332,19 @@
         </div>
 
         <div class="card">
-          <h2>Round updates</h2>
-          <div class="sub">Posted by competition organizers</div>
-          <div class="announce-item">
-            <div class="time">Today, 12:40 PM</div>
-            <div class="msg">Round 2 room assignments are posted. Please arrive 15 minutes before your call time.</div>
+          <h2>Preliminary Round, Nov 13</h2>
+          <div class="sub">Updates automatically as rounds are released</div>
+          <div class="assignment-row">
+            <div><div class="label">Case</div><div class="value case-caption">Patel et al. v. United States et al.</div></div>
           </div>
-          <div class="announce-item">
-            <div class="time">Today, 9:05 AM</div>
-            <div class="msg">Round 1 results have been published — check your Results panel.</div>
+          <div class="assignment-row">
+            <div><div class="label">Room</div><div class="value">Charney 205</div></div>
           </div>
-          <div class="announce-item">
-            <div class="time">Yesterday, 4:15 PM</div>
-            <div class="msg">Reminder: bench memos are due before your assigned round begins.</div>
+          <div class="assignment-row">
+            <div><div class="label">Call time</div><div class="value">10:00 AM</div></div>
+          </div>
+          <div class="assignment-row">
+            <div><div class="label">Side</div><div class="value">Respondent</div></div>
           </div>
         </div>
       </div>
@@ -332,7 +353,7 @@
       <div>
         <div class="card">
           <h2>My results</h2>
-          <div class="sub">Round 1 · Petitioner</div>
+          <div class="sub">Preliminary Round, Nov 12 · Petitioner</div>
           <span class="badge published">Published</span>
 
           <div class="stat-pair">
@@ -341,35 +362,16 @@
               <div class="lbl">Mean score</div>
             </div>
             <div class="stat">
-              <div class="num">8.0</div>
-              <div class="lbl">Mode score</div>
+              <div class="num">14 of 24</div>
+              <div class="lbl">Place</div>
             </div>
           </div>
-
-          <table class="scores">
-            <thead>
-              <tr><th>Judge</th><th>Score</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>Judge 1</td><td>8.0</td></tr>
-              <tr><td>Judge 2</td><td>8.0</td></tr>
-              <tr><td>Judge 3</td><td>7.0</td></tr>
-            </tbody>
-          </table>
 
           <div class="tiebreak-note">
             <strong>Tie-break rule:</strong> if two competitors are tied after mean/mode, the panel's higher set of three scores (ranked highest to lowest) determines the advancing competitor.
           </div>
 
           <div class="lock-note">🔒 Visible to you only — no other competitor or team can see this panel.</div>
-        </div>
-
-        <div class="card">
-          <h2>Round 2 results</h2>
-          <span class="badge pending">Not yet published</span>
-          <p style="font-size:13px;color:var(--stone);margin-top:12px;">
-            Scores are entered by organizers after each round and released once all ballots for the round are confirmed.
-          </p>
         </div>
 
         <div class="card" id="settings-card">
@@ -409,8 +411,8 @@
     </div>
 
     <div class="card">
-      <h2>Enter ballot scores</h2>
-      <div class="sub">Round 2 — Quarterfinal · <span class="case-caption">Patel et al. v. United States et al.</span> · Bergin Hall, Courtroom 3</div>
+      <h2>Enter Score Reports</h2>
+      <div class="sub">Preliminary Round 1 · <span class="case-caption">Patel et al. v. United States et al.</span> · Charney 106</div>
 
       <table class="org-table">
         <thead>
@@ -418,7 +420,7 @@
         </thead>
         <tbody>
           <tr>
-            <td>Jordan Alvarez</td>
+            <td>Competitor A</td>
             <td>Petitioner</td>
             <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
             <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
@@ -426,7 +428,94 @@
             <td><button class="btn-secondary" style="padding:6px 12px;">Save</button></td>
           </tr>
           <tr>
-            <td>Morgan Reyes</td>
+            <td>Competitor B</td>
+            <td>Respondent</td>
+            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
+            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
+            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
+            <td><button class="btn-secondary" style="padding:6px 12px;">Save</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Enter Score Reports</h2>
+      <div class="sub">Preliminary Round 1 · <span class="case-caption">Patel et al. v. United States et al.</span> · Charney 205</div>
+
+      <table class="org-table">
+        <thead>
+          <tr><th>Competitor</th><th>Side</th><th>Judge 1</th><th>Judge 2</th><th>Judge 3</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Competitor C</td>
+            <td>Petitioner</td>
+            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
+            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
+            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
+            <td><button class="btn-secondary" style="padding:6px 12px;">Save</button></td>
+          </tr>
+          <tr>
+            <td>Competitor D</td>
+            <td>Respondent</td>
+            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
+            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
+            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
+            <td><button class="btn-secondary" style="padding:6px 12px;">Save</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Enter Score Reports</h2>
+      <div class="sub">Preliminary Round 1 · <span class="case-caption">Patel et al. v. United States et al.</span> · Charney 207</div>
+
+      <table class="org-table">
+        <thead>
+          <tr><th>Competitor</th><th>Side</th><th>Judge 1</th><th>Judge 2</th><th>Judge 3</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Competitor E</td>
+            <td>Petitioner</td>
+            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
+            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
+            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
+            <td><button class="btn-secondary" style="padding:6px 12px;">Save</button></td>
+          </tr>
+          <tr>
+            <td>Competitor F</td>
+            <td>Respondent</td>
+            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
+            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
+            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
+            <td><button class="btn-secondary" style="padding:6px 12px;">Save</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Enter Score Reports</h2>
+      <div class="sub">Preliminary Round 1 · <span class="case-caption">Patel et al. v. United States et al.</span> · Charney 210</div>
+
+      <table class="org-table">
+        <thead>
+          <tr><th>Competitor</th><th>Side</th><th>Judge 1</th><th>Judge 2</th><th>Judge 3</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Competitor G</td>
+            <td>Petitioner</td>
+            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
+            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
+            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
+            <td><button class="btn-secondary" style="padding:6px 12px;">Save</button></td>
+          </tr>
+          <tr>
+            <td>Competitor H</td>
             <td>Respondent</td>
             <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
             <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
@@ -443,7 +532,15 @@
 
     <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
       <div>
-        <h2 style="margin-bottom:4px;">Round 1 — Preliminary</h2>
+        <h2 style="margin-bottom:4px;">Preliminary Round 1</h2>
+        <div class="sub" style="margin-bottom:0;">All ballots entered</div>
+      </div>
+      <button class="btn-primary" style="width:auto;">Publish results to competitors</button>
+    </div>
+
+    <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <h2 style="margin-bottom:4px;">Preliminary Round 2</h2>
         <div class="sub" style="margin-bottom:0;">All ballots entered</div>
       </div>
       <button class="btn-primary" style="width:auto;">Publish results to competitors</button>
@@ -471,38 +568,72 @@
       </a>
     </div>
 
-    <div class="info-grid">
-      <div class="info-card">
-        <div class="icon-label">Commitment</div>
-        <h3>One round, ~2 hours</h3>
-        <p>Judges are assigned to a single round of oral arguments and typically serve on a three-judge panel.</p>
+    <details class="accordion">
+      <summary>Parking Information</summary>
+      <div class="accordion-body">
+        Santa Clara Law has two adjacent parking structures, each one block from Charney Hall. During the
+        weekdays, parking is paid, but please email <a href="mailto:hmc@scu.edu">hmc@scu.edu</a> to reserve a
+        parking day-pass. Parking is free on weekends. Charney Hall is fully ADA-accessible.
       </div>
-      <div class="info-card">
-        <div class="icon-label">What you'll do</div>
-        <h3>Score and question</h3>
-        <p>Ask questions during oral argument and score each competitor using the provided rubric.</p>
+    </details>
+
+    <details class="accordion">
+      <summary>Competitor Rules and Guidelines</summary>
+      <div class="accordion-body">
+        Full competition rules and guidelines will be posted here. Contact the Moot Court Board at
+        <a href="mailto:hmc@scu.edu">hmc@scu.edu</a> with any questions in the meantime.
       </div>
-      <div class="info-card">
-        <div class="icon-label">No account needed</div>
-        <h3>Simple sign-up</h3>
-        <p>Express interest through the form below — a member of the Moot Court Board will follow up with logistics by email.</p>
-      </div>
+    </details>
+
+    <div class="card">
+      <h2>Who's eligible?</h2>
+      <p style="font-size:13px;color:#333;margin:0;">
+        Post-grad JDs, practicing lawyers, post-bar attorneys, and legal academia — we're interested in having a
+        variety of perspectives for our competitions.
+      </p>
     </div>
 
     <div class="card">
-      <h2>Frequently asked questions</h2>
-      <div class="faq-item">
-        <h4>Do I need to create an account?</h4>
-        <p>No. Judges do not need to log in anywhere on this site. Fill out the interest form, and our team will email you directly with your assignment, room, and materials.</p>
-      </div>
-      <div class="faq-item">
-        <h4>What if I've never judged moot court before?</h4>
-        <p>That's fine — we'll send a short scoring guide and bench memo ahead of your round, and a member of the Moot Court Board will be on hand to answer questions.</p>
-      </div>
-      <div class="faq-item">
-        <h4>How are scores used?</h4>
-        <p>Each judge scores independently. Competitors are ranked using the mean and mode of their panel's three scores, with a documented tie-break rule if needed.</p>
-      </div>
+      <h2>What is the competition format?</h2>
+      <p style="font-size:13px;color:#333;margin:0;">
+        Each round, Petitioner and Respondent teams of two will present arguments around two issues, with each
+        speaker arguing for 15 minutes, and the Petitioner team given a chance for rebuttal. The judges will then
+        confer on individual scores amongst themselves, and call the advocates for general or specific feedback.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>What are event schedules like?</h2>
+      <p style="font-size:13px;color:#333;margin:0;">
+        We ask that judges arrive 15 minutes prior to the start of the round to ensure no delays. Rounds will
+        typically last 75–90 minutes, with an allotted break time. Two rounds will occur each competition date —
+        please let us know how many rounds you'd be interested in judging.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Where can I park?</h2>
+      <p style="font-size:13px;color:#333;margin:0;">
+        Santa Clara Law has two adjacent parking structures, each one block from Charney Hall. During the
+        weekdays, parking is paid, but please email <a href="mailto:hmc@scu.edu">hmc@scu.edu</a> to reserve a
+        parking day-pass. Parking is free on weekends. Charney Hall is fully ADA-accessible.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Is a bench brief provided beforehand?</h2>
+      <p style="font-size:13px;color:#333;margin:0;">
+        Yes! The HMC Board will send you a copy of the bench brief, along with a few opportunities to consult the
+        HMC Board with any questions.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>If something comes up, how should I cancel?</h2>
+      <p style="font-size:13px;color:#333;margin:0;">
+        Please email <a href="mailto:hmc@scu.edu">hmc@scu.edu</a> with any cancellations as soon as you know of
+        your conflict.
+      </p>
     </div>
 
     <div class="card" style="text-align:center;">
