@@ -97,6 +97,11 @@
     width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:4px;
     font-size:14px; font-family:var(--font-sans);
   }
+  .field select{
+    width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:4px;
+    font-size:14px; font-family:var(--font-sans); background:#fff; color:var(--black);
+    max-width:100%;
+  }
   .btn-primary{
     width:100%; background:var(--scu-red); color:#fff; border:none; padding:11px;
     border-radius:4px; font-size:14px; font-weight:500; cursor:pointer; margin-top:6px;
@@ -888,7 +893,10 @@ async function loadOrganizerData(){
         <h2 style="margin-bottom:4px;">${r.round_name}</h2>
         <div class="sub" style="margin-bottom:0;">${r.published ? 'Published to competitors' : 'Not yet published'}</div>
       </div>
-      <button class="btn-primary" style="width:auto;" onclick="publishRound('${r.id}')">Publish results to competitors</button>`;
+      <div style="display:flex;gap:10px;align-items:center;">
+        <button class="btn-secondary" onclick="deleteRound('${r.id}', '${r.round_name.replace(/'/g, "\\'")}')">Delete</button>
+        <button class="btn-primary" style="width:auto;" onclick="publishRound('${r.id}')">Publish results to competitors</button>
+      </div>`;
     publishContainer.appendChild(card);
   });
   if (!rounds || !rounds.length) {
@@ -907,6 +915,12 @@ async function createRound(){
   const prep_room = document.getElementById('new-round-prep').value.trim() || null;
 
   if (!round_name) { alert('Round name is required.'); return; }
+
+  const { data: existing } = await supabase.from('rounds').select('id').eq('round_name', round_name);
+  if (existing && existing.length) {
+    const proceed = confirm(`A round named "${round_name}" already exists. A round can hold multiple rooms — did you mean to use Assign Matchup instead of creating another round? Click OK to create a duplicate anyway, or Cancel to stop.`);
+    if (!proceed) return;
+  }
 
   const { error } = await supabase.from('rounds').insert({ round_name, round_date, prep_room, published: false });
   if (error) { alert('Could not add round: ' + error.message); return; }
@@ -1040,6 +1054,19 @@ async function publishRound(roundId){
   const { error } = await supabase.from('rounds').update({ published: true }).eq('id', roundId);
   if (error) { alert('Could not publish: ' + error.message); return; }
   alert('Published to competitors.');
+  loadOrganizerData();
+}
+
+async function deleteRound(roundId, roundName){
+  let supabase;
+  try { supabase = getSupabase(); } catch (e) { alert(e.message); return; }
+
+  const confirmed = confirm(`Delete "${roundName}"? This also removes every room assignment and score entered for this round. This cannot be undone.`);
+  if (!confirmed) return;
+
+  const { error } = await supabase.from('rounds').delete().eq('id', roundId);
+  if (error) { alert('Could not delete round: ' + error.message); return; }
+
   loadOrganizerData();
 }
 
