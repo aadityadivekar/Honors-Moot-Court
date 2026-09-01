@@ -55,7 +55,12 @@
   /* ---- mobile header: stack signature + case name above a full-width nav row ---- */
   @media (max-width: 640px){
     header.site{ flex-direction:column; align-items:flex-start; gap:14px; padding:16px 20px; }
-    .site-title h1{ font-size:21px; }
+    .site-title{ width:100%; max-width:100%; }
+    .site-title h1{
+      font-size:clamp(13px, 4.6vw, 21px);
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      max-width:100%;
+    }
     nav.tabs{ width:100%; }
     nav.tabs button{ flex:1; text-align:center; padding:10px 8px; }
   }
@@ -111,7 +116,28 @@
   }
 
   /* ---- DASHBOARD VIEW ---- */
-  .dash-grid{ display:grid; grid-template-columns:1.3fr 1fr; gap:20px; }
+  .dash-grid{
+    display:grid; grid-template-columns:1.3fr 1fr; gap:20px;
+    grid-template-areas:
+      "round1 results"
+      "round2 settings";
+  }
+  .dash-round1{ grid-area:round1; margin-bottom:0; }
+  .dash-round2{ grid-area:round2; margin-bottom:0; }
+  .dash-results{ grid-area:results; margin-bottom:0; }
+  .dash-settings{ grid-area:settings; margin-bottom:0; }
+
+  @media (max-width:640px){
+    .dash-grid{
+      grid-template-columns:1fr;
+      grid-template-areas:
+        "results"
+        "round1"
+        "round2"
+        "settings";
+      gap:16px;
+    }
+  }
   .badge{
     display:inline-block; font-size:11px; font-weight:600; padding:3px 9px;
     border-radius:20px; letter-spacing:.02em;
@@ -235,6 +261,19 @@
     font-size:11px; font-weight:600; padding:2px 8px; border-radius:20px; background:var(--stone-light); color:var(--stone);
   }
   .case-caption{ font-style:italic; }
+  .table-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+
+  /* ---- mobile: squeeze organizer score-entry tables to fit a standard phone width ---- */
+  @media (max-width:640px){
+    .card{ padding:16px 14px; }
+    #organizer .card h2{ font-size:16px; }
+    #organizer .card .sub{ font-size:11.5px; }
+    .org-table{ font-size:11px; }
+    .org-table th, .org-table td{ padding:5px 3px; }
+    .org-table th{ font-size:9.5px; }
+    .org-table input[type=number]{ width:38px; padding:5px 3px; font-size:11px; }
+    .org-table .btn-secondary{ padding:5px 7px; font-size:10.5px; white-space:nowrap; }
+  }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -313,69 +352,30 @@
     </div>
 
     <div class="dash-grid">
-      <!-- LEFT COLUMN -->
-      <div>
-        <div class="card">
-          <h2>Preliminary Round, Nov 12</h2>
+      <div class="card dash-round1">
+          <h2 id="dash-round1-title">Preliminary Round</h2>
           <div class="sub">Updates automatically as rounds are released</div>
-          <div class="assignment-row">
-            <div><div class="label">Case</div><div class="value case-caption">Patel et al. v. United States et al.</div></div>
-          </div>
-          <div class="assignment-row">
-            <div><div class="label">Room</div><div class="value">Charney 106</div></div>
-          </div>
-          <div class="assignment-row">
-            <div><div class="label">Call time</div><div class="value">1:30 PM</div></div>
-          </div>
-          <div class="assignment-row">
-            <div><div class="label">Side</div><div class="value">Petitioner</div></div>
-          </div>
-        </div>
-
-        <div class="card">
-          <h2>Preliminary Round, Nov 13</h2>
-          <div class="sub">Updates automatically as rounds are released</div>
-          <div class="assignment-row">
-            <div><div class="label">Case</div><div class="value case-caption">Patel et al. v. United States et al.</div></div>
-          </div>
-          <div class="assignment-row">
-            <div><div class="label">Room</div><div class="value">Charney 205</div></div>
-          </div>
-          <div class="assignment-row">
-            <div><div class="label">Call time</div><div class="value">10:00 AM</div></div>
-          </div>
-          <div class="assignment-row">
-            <div><div class="label">Side</div><div class="value">Respondent</div></div>
-          </div>
-        </div>
+          <div id="dash-round1-body"><p style="font-size:13px;color:var(--stone);margin:0;">Loading…</p></div>
       </div>
 
-      <!-- RIGHT COLUMN -->
-      <div>
-        <div class="card">
-          <h2>My results</h2>
-          <div class="sub">Preliminary Round, Nov 12 · Petitioner</div>
-          <span class="badge published">Published</span>
+      <div class="card dash-round2">
+          <h2 id="dash-round2-title">Preliminary Round</h2>
+          <div class="sub">Updates automatically as rounds are released</div>
+          <div id="dash-round2-body"><p style="font-size:13px;color:var(--stone);margin:0;">Loading…</p></div>
+      </div>
 
-          <div class="stat-pair">
-            <div class="stat">
-              <div class="num">7.7</div>
-              <div class="lbl">Mean score</div>
-            </div>
-            <div class="stat">
-              <div class="num">14 of 24</div>
-              <div class="lbl">Place</div>
-            </div>
-          </div>
+      <div class="card dash-results">
+          <h2>My results</h2>
+          <div id="dash-results-body"><p style="font-size:13px;color:var(--stone);margin:0;">Loading…</p></div>
 
           <div class="tiebreak-note">
             <strong>Tie-break rule:</strong> if two competitors are tied after mean/mode, the panel's higher set of three scores (ranked highest to lowest) determines the advancing competitor.
           </div>
 
           <div class="lock-note">🔒 Visible to you only — no other competitor or team can see this panel.</div>
-        </div>
+      </div>
 
-        <div class="card" id="settings-card">
+      <div class="card dash-settings" id="settings-card">
           <h2>Account settings</h2>
           <div class="sub">Change your password at any time — no need to wait for a reset email</div>
           <div class="field">
@@ -393,7 +393,6 @@
             </div>
           </div>
           <button class="btn-secondary" onclick="updatePassword()">Update password</button>
-        </div>
       </div>
     </div>
   </section>
@@ -412,139 +411,72 @@
     </div>
 
     <div class="card">
-      <h2>Enter Score Reports</h2>
-      <div class="sub">Preliminary Round 1 · <span class="case-caption">Patel et al. v. United States et al.</span> · Charney 106</div>
+      <h2>Assign Competitors</h2>
+      <div class="sub">Set each competitor's round, room, call time, and side. Team name is optional and shows in bold italics next to their name on the scoring sheet.</div>
 
-      <table class="org-table">
-        <thead>
-          <tr><th>Competitor</th><th>Side</th><th>Judge 1</th><th>Judge 2</th><th>Judge 3</th><th></th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Competitor A</td>
-            <td>Petitioner</td>
-            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
-            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
-            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
-            <td><button class="btn-secondary" style="padding:6px 12px;">Save</button></td>
-          </tr>
-          <tr>
-            <td>Competitor B</td>
-            <td>Respondent</td>
-            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
-            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
-            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
-            <td><button class="btn-secondary" style="padding:6px 12px;">Save</button></td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="field">
+        <label>Round</label>
+        <select id="assign-round"></select>
+      </div>
+      <div class="field">
+        <label>Competitor</label>
+        <select id="assign-competitor"></select>
+      </div>
+      <div class="settings-row">
+        <div class="field">
+          <label>Team name (optional)</label>
+          <input id="assign-team" type="text" placeholder="e.g. Team Falcon">
+        </div>
+        <div class="field">
+          <label>Side</label>
+          <select id="assign-side">
+            <option value="Petitioner">Petitioner</option>
+            <option value="Respondent">Respondent</option>
+          </select>
+        </div>
+      </div>
+      <div class="settings-row">
+        <div class="field">
+          <label>Room</label>
+          <input id="assign-room" type="text" placeholder="e.g. Charney 106">
+        </div>
+        <div class="field">
+          <label>Call time</label>
+          <input id="assign-call-time" type="text" placeholder="e.g. 1:30 PM">
+        </div>
+      </div>
+      <button class="btn-primary" style="width:auto;" onclick="saveAssignment()">Save assignment</button>
+      <div id="assign-status" style="font-size:12px;color:var(--stone);margin-top:10px;"></div>
     </div>
 
     <div class="card">
       <h2>Enter Score Reports</h2>
-      <div class="sub">Preliminary Round 1 · <span class="case-caption">Patel et al. v. United States et al.</span> · Charney 205</div>
-
-      <table class="org-table">
-        <thead>
-          <tr><th>Competitor</th><th>Side</th><th>Judge 1</th><th>Judge 2</th><th>Judge 3</th><th></th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Competitor C</td>
-            <td>Petitioner</td>
-            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
-            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
-            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
-            <td><button class="btn-secondary" style="padding:6px 12px;">Save</button></td>
-          </tr>
-          <tr>
-            <td>Competitor D</td>
-            <td>Respondent</td>
-            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
-            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
-            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
-            <td><button class="btn-secondary" style="padding:6px 12px;">Save</button></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="card">
-      <h2>Enter Score Reports</h2>
-      <div class="sub">Preliminary Round 1 · <span class="case-caption">Patel et al. v. United States et al.</span> · Charney 207</div>
-
-      <table class="org-table">
-        <thead>
-          <tr><th>Competitor</th><th>Side</th><th>Judge 1</th><th>Judge 2</th><th>Judge 3</th><th></th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Competitor E</td>
-            <td>Petitioner</td>
-            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
-            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
-            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
-            <td><button class="btn-secondary" style="padding:6px 12px;">Save</button></td>
-          </tr>
-          <tr>
-            <td>Competitor F</td>
-            <td>Respondent</td>
-            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
-            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
-            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
-            <td><button class="btn-secondary" style="padding:6px 12px;">Save</button></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="card">
-      <h2>Enter Score Reports</h2>
-      <div class="sub">Preliminary Round 1 · <span class="case-caption">Patel et al. v. United States et al.</span> · Charney 210</div>
-
-      <table class="org-table">
-        <thead>
-          <tr><th>Competitor</th><th>Side</th><th>Judge 1</th><th>Judge 2</th><th>Judge 3</th><th></th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Competitor G</td>
-            <td>Petitioner</td>
-            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
-            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
-            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
-            <td><button class="btn-secondary" style="padding:6px 12px;">Save</button></td>
-          </tr>
-          <tr>
-            <td>Competitor H</td>
-            <td>Respondent</td>
-            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
-            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
-            <td><input type="number" min="0" max="10" step="0.5" placeholder="0–10"></td>
-            <td><button class="btn-secondary" style="padding:6px 12px;">Save</button></td>
-          </tr>
-        </tbody>
-      </table>
-
+      <div class="sub">Choose a round to load its rooms and competitors.</div>
+      <div class="field" style="max-width:320px;">
+        <label>Round</label>
+        <select id="scoring-round" onchange="loadScoringRound()"></select>
+      </div>
       <div class="tiebreak-note">
-        Scores save per competitor as soon as all three judge fields are filled. Mean and mode are calculated automatically and stay hidden from competitors until you publish the round.
+        Scores save per competitor as soon as you click Save for their row. Mean and place update live for each competitor as soon as any of their judges' scores are entered — no need to wait for Publish.
       </div>
     </div>
+
+    <div id="scoring-cards"></div>
 
     <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
       <div>
         <h2 style="margin-bottom:4px;">Preliminary Round 1</h2>
-        <div class="sub" style="margin-bottom:0;">All ballots entered</div>
+        <div class="sub" id="round1-status" style="margin-bottom:0;">Loading status…</div>
       </div>
-      <button class="btn-primary" style="width:auto;">Publish results to competitors</button>
+      <button class="btn-primary" style="width:auto;" onclick="publishRound('Preliminary Round 1')">Publish results to competitors</button>
     </div>
 
     <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
       <div>
         <h2 style="margin-bottom:4px;">Preliminary Round 2</h2>
-        <div class="sub" style="margin-bottom:0;">All ballots entered</div>
+        <div class="sub" id="round2-status" style="margin-bottom:0;">Loading status…</div>
       </div>
-      <button class="btn-primary" style="width:auto;">Publish results to competitors</button>
+      <button class="btn-primary" style="width:auto;" onclick="publishRound('Preliminary Round 2')">Publish results to competitors</button>
     </div>
 
     <div class="card">
@@ -729,10 +661,12 @@ async function signIn(){
   if (profile.role === 'organizer') {
     document.getElementById('organizer-email').textContent = profile.email;
     showView('organizer', null);
+    loadOrganizerData();
   } else {
     document.getElementById('dashboard-name').textContent = profile.email;
     document.getElementById('force-change-banner').style.display = profile.must_change_password ? 'flex' : 'none';
     showView('dashboard', null);
+    loadDashboardData(data.user.id);
   }
 }
 
@@ -782,6 +716,294 @@ async function updatePassword(){
   document.getElementById('new-password').value = '';
   document.getElementById('confirm-password').value = '';
   alert('Password updated.');
+}
+
+function formatRoundDate(dateStr){
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+// ================= COMPETITOR DASHBOARD: real data ==================
+async function loadDashboardData(userId){
+  let supabase;
+  try { supabase = getSupabase(); } catch (e) { alert(e.message); return; }
+
+  const { data: rounds, error: roundsError } = await supabase
+    .from('rounds')
+    .select('id, round_name, case_name, round_date, published')
+    .order('round_date');
+
+  if (roundsError) {
+    document.getElementById('dash-round1-body').innerHTML = '<p style="font-size:13px;color:var(--stone);">Could not load rounds.</p>';
+    return;
+  }
+
+  const { data: assignments } = await supabase
+    .from('assignments')
+    .select('round_id, room, call_time, side')
+    .eq('competitor_id', userId);
+
+  const assignByRound = {};
+  (assignments || []).forEach(a => assignByRound[a.round_id] = a);
+
+  renderDashboardRoundCard('dash-round1', rounds && rounds[0], assignByRound);
+  renderDashboardRoundCard('dash-round2', rounds && rounds[1], assignByRound);
+
+  const resultsBody = document.getElementById('dash-results-body');
+  resultsBody.innerHTML = '';
+
+  for (const r of (rounds || [])) {
+    const { data: result, error: rpcError } = await supabase.rpc('get_my_results', { p_round_id: r.id });
+    const row = (!rpcError && result && result[0]) ? result[0] : null;
+
+    const block = document.createElement('div');
+    block.style.marginBottom = '18px';
+
+    const statusBadge = r.published
+      ? '<span class="badge published">Final</span>'
+      : '<span class="badge pending">Live</span>';
+
+    if (row && row.mean_score !== null) {
+      block.innerHTML = `
+        <div class="sub" style="margin-bottom:4px;">${r.round_name}${statusBadge}</div>
+        <div class="stat-pair">
+          <div class="stat"><div class="num">${Number(row.mean_score).toFixed(1)}</div><div class="lbl">Mean score</div></div>
+          <div class="stat"><div class="num">${row.place} of ${row.total_scored}</div><div class="lbl">Place</div></div>
+        </div>`;
+    } else {
+      block.innerHTML = `
+        <div class="sub" style="margin-bottom:4px;">${r.round_name}${statusBadge}</div>
+        <p style="font-size:13px;color:var(--stone);margin:0;">Scores not yet entered for this round.</p>`;
+    }
+    resultsBody.appendChild(block);
+  }
+
+  if (!rounds || !rounds.length) {
+    resultsBody.innerHTML = '<p style="font-size:13px;color:var(--stone);margin:0;">No rounds scheduled yet.</p>';
+  }
+}
+
+function renderDashboardRoundCard(prefix, round, assignByRound){
+  const titleEl = document.getElementById(prefix + '-title');
+  const bodyEl = document.getElementById(prefix + '-body');
+  if (!titleEl || !bodyEl) return;
+
+  if (!round) {
+    titleEl.textContent = 'Preliminary Round';
+    bodyEl.innerHTML = '<p style="font-size:13px;color:var(--stone);margin:0;">No round scheduled.</p>';
+    return;
+  }
+
+  titleEl.textContent = `${round.round_name} — ${formatRoundDate(round.round_date)}`;
+
+  const a = assignByRound[round.id];
+  if (!a) {
+    bodyEl.innerHTML = '<p style="font-size:13px;color:var(--stone);margin:0;">You have not been assigned a room for this round yet.</p>';
+    return;
+  }
+
+  bodyEl.innerHTML = `
+    <div class="assignment-row"><div><div class="label">Case</div><div class="value case-caption">${round.case_name}</div></div></div>
+    <div class="assignment-row"><div><div class="label">Room</div><div class="value">${a.room || 'TBD'}</div></div></div>
+    <div class="assignment-row"><div><div class="label">Call time</div><div class="value">${a.call_time || 'TBD'}</div></div></div>
+    <div class="assignment-row"><div><div class="label">Side</div><div class="value">${a.side || 'TBD'}</div></div></div>`;
+}
+
+// ================= ORGANIZER CONSOLE: real data ==================
+async function loadOrganizerData(){
+  let supabase;
+  try { supabase = getSupabase(); } catch (e) { alert(e.message); return; }
+
+  const { data: rounds, error: roundsError } = await supabase
+    .from('rounds')
+    .select('id, round_name, round_date, published')
+    .order('round_date');
+
+  if (roundsError) { alert('Could not load rounds: ' + roundsError.message); return; }
+
+  const roundOptions = (rounds || [])
+    .map(r => `<option value="${r.id}">${r.round_name} — ${formatRoundDate(r.round_date)}</option>`)
+    .join('');
+  document.getElementById('assign-round').innerHTML = roundOptions;
+  document.getElementById('scoring-round').innerHTML = roundOptions;
+
+  const { data: competitors, error: compError } = await supabase
+    .from('profiles')
+    .select('id, email, team_name')
+    .eq('role', 'competitor')
+    .order('email');
+
+  if (!compError) {
+    document.getElementById('assign-competitor').innerHTML = (competitors || [])
+      .map(c => `<option value="${c.id}">${c.email}${c.team_name ? ' — ' + c.team_name : ''}</option>`)
+      .join('');
+  }
+
+  const r1 = (rounds || []).find(r => r.round_name === 'Preliminary Round 1');
+  const r2 = (rounds || []).find(r => r.round_name === 'Preliminary Round 2');
+  const round1StatusEl = document.getElementById('round1-status');
+  const round2StatusEl = document.getElementById('round2-status');
+  if (round1StatusEl) round1StatusEl.textContent = r1 ? (r1.published ? 'Published to competitors' : 'Not yet published') : 'Round not found';
+  if (round2StatusEl) round2StatusEl.textContent = r2 ? (r2.published ? 'Published to competitors' : 'Not yet published') : 'Round not found';
+
+  if (rounds && rounds.length) loadScoringRound();
+}
+
+async function saveAssignment(){
+  let supabase;
+  try { supabase = getSupabase(); } catch (e) { alert(e.message); return; }
+
+  const round_id = document.getElementById('assign-round').value;
+  const competitor_id = document.getElementById('assign-competitor').value;
+  const team_name = document.getElementById('assign-team').value.trim();
+  const side = document.getElementById('assign-side').value;
+  const room = document.getElementById('assign-room').value.trim();
+  const call_time = document.getElementById('assign-call-time').value.trim();
+
+  if (!round_id || !competitor_id || !room) {
+    alert('Round, competitor, and room are required.');
+    return;
+  }
+
+  const { error: assignError } = await supabase
+    .from('assignments')
+    .upsert({ round_id, competitor_id, room, call_time, side }, { onConflict: 'round_id,competitor_id' });
+
+  if (assignError) { alert('Could not save assignment: ' + assignError.message); return; }
+
+  if (team_name) {
+    const { error: teamError } = await supabase.from('profiles').update({ team_name }).eq('id', competitor_id);
+    if (teamError) { alert('Assignment saved, but team name failed to save: ' + teamError.message); return; }
+  }
+
+  const statusEl = document.getElementById('assign-status');
+  statusEl.textContent = 'Saved.';
+  setTimeout(() => { statusEl.textContent = ''; }, 2500);
+
+  loadOrganizerData();
+}
+
+async function publishRound(roundName){
+  let supabase;
+  try { supabase = getSupabase(); } catch (e) { alert(e.message); return; }
+
+  const { error } = await supabase.from('rounds').update({ published: true }).eq('round_name', roundName);
+  if (error) { alert('Could not publish: ' + error.message); return; }
+  alert(roundName + ' published to competitors.');
+  loadOrganizerData();
+}
+
+async function loadScoringRound(){
+  let supabase;
+  try { supabase = getSupabase(); } catch (e) { alert(e.message); return; }
+
+  const roundSelect = document.getElementById('scoring-round');
+  const round_id = roundSelect.value;
+  const roundLabel = roundSelect.selectedOptions[0] ? roundSelect.selectedOptions[0].textContent : '';
+  const container = document.getElementById('scoring-cards');
+  if (!round_id) { container.innerHTML = ''; return; }
+
+  const { data: assignments, error: aError } = await supabase
+    .from('assignments')
+    .select('room, call_time, side, competitor_id')
+    .eq('round_id', round_id);
+
+  if (aError) { container.innerHTML = `<div class="card"><p style="font-size:13px;color:var(--stone);margin:0;">Could not load assignments: ${aError.message}</p></div>`; return; }
+
+  if (!assignments || !assignments.length) {
+    container.innerHTML = '<div class="card"><p style="font-size:13px;color:var(--stone);margin:0;">No competitors assigned to this round yet — use Assign Competitors above.</p></div>';
+    return;
+  }
+
+  const competitorIds = [...new Set(assignments.map(a => a.competitor_id))];
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('id, email, team_name')
+    .in('id', competitorIds);
+
+  const profilesById = {};
+  (profiles || []).forEach(p => profilesById[p.id] = p);
+
+  const { data: ballots } = await supabase
+    .from('ballots')
+    .select('competitor_id, judge_1_score, judge_2_score, judge_3_score')
+    .eq('round_id', round_id);
+
+  const ballotMap = {};
+  (ballots || []).forEach(b => ballotMap[b.competitor_id] = b);
+
+  const byRoom = {};
+  assignments.forEach(a => {
+    const key = a.room || 'Unassigned room';
+    byRoom[key] = byRoom[key] || [];
+    byRoom[key].push(a);
+  });
+
+  container.innerHTML = '';
+  Object.keys(byRoom).sort().forEach(room => {
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    let rowsHtml = '';
+    byRoom[room].forEach(a => {
+      const p = profilesById[a.competitor_id] || { email: '(unknown)', team_name: '' };
+      const b = ballotMap[a.competitor_id] || {};
+      const teamHtml = p.team_name ? ` <span style="font-style:italic;font-weight:700;">${p.team_name}</span>` : '';
+      const j1 = b.judge_1_score !== undefined && b.judge_1_score !== null ? b.judge_1_score : '';
+      const j2 = b.judge_2_score !== undefined && b.judge_2_score !== null ? b.judge_2_score : '';
+      const j3 = b.judge_3_score !== undefined && b.judge_3_score !== null ? b.judge_3_score : '';
+      rowsHtml += `
+        <tr>
+          <td>${p.email}${teamHtml}</td>
+          <td>${a.side || ''}</td>
+          <td><input type="number" min="0" max="10" step="0.5" value="${j1}" data-judge="judge_1_score"></td>
+          <td><input type="number" min="0" max="10" step="0.5" value="${j2}" data-judge="judge_2_score"></td>
+          <td><input type="number" min="0" max="10" step="0.5" value="${j3}" data-judge="judge_3_score"></td>
+          <td><button class="btn-secondary" style="padding:6px 12px;" onclick="saveBallotRow(this, '${round_id}', '${a.competitor_id}')">Save</button></td>
+        </tr>`;
+    });
+
+    card.innerHTML = `
+      <h2>Enter Score Reports</h2>
+      <div class="sub">${roundLabel} · <span class="case-caption">Patel et al. v. United States et al.</span> · ${room}</div>
+      <div class="table-scroll">
+        <table class="org-table">
+          <thead><tr><th>Competitor</th><th>Side</th><th>Judge 1</th><th>Judge 2</th><th>Judge 3</th><th></th></tr></thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+      </div>`;
+    container.appendChild(card);
+  });
+}
+
+async function saveBallotRow(btn, round_id, competitor_id){
+  let supabase;
+  try { supabase = getSupabase(); } catch (e) { alert(e.message); return; }
+
+  const row = btn.closest('tr');
+  const inputs = row.querySelectorAll('input[type=number]');
+  const scores = {};
+  inputs.forEach(inp => { scores[inp.dataset.judge] = inp.value === '' ? null : parseFloat(inp.value); });
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) { alert('You are not signed in.'); return; }
+
+  const { error } = await supabase.from('ballots').upsert({
+    round_id,
+    competitor_id,
+    judge_1_score: scores.judge_1_score,
+    judge_2_score: scores.judge_2_score,
+    judge_3_score: scores.judge_3_score,
+    entered_by: user.id,
+    updated_at: new Date().toISOString()
+  }, { onConflict: 'round_id,competitor_id' });
+
+  if (error) { alert('Could not save score: ' + error.message); return; }
+
+  const originalText = btn.textContent;
+  btn.textContent = 'Saved ✓';
+  setTimeout(() => { btn.textContent = originalText; }, 1500);
 }
 </script>
 
