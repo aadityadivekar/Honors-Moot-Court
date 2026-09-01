@@ -236,6 +236,7 @@
   }
   .case-caption{ font-style:italic; }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -303,11 +304,11 @@
     <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
       <div>
         <div class="sub" style="margin-bottom:2px;">Welcome back,</div>
-        <h2 style="margin:0;">Jordan Alvarez</h2>
+        <h2 style="margin:0;" id="dashboard-name">Jordan Alvarez</h2>
         <div class="sub case-caption" style="margin-top:6px;">Patel et al. v. United States et al.</div>
       </div>
       <div style="text-align:right;">
-        <a href="#" style="font-size:15px;font-weight:500;" onclick="showView('login', document.getElementById('nav-login')); return false;">Log out</a>
+        <a href="#" style="font-size:15px;font-weight:500;" onclick="signOut(); return false;">Log out</a>
       </div>
     </div>
 
@@ -379,19 +380,19 @@
           <div class="sub">Change your password at any time — no need to wait for a reset email</div>
           <div class="field">
             <label>Current password</label>
-            <input type="password" placeholder="••••••••">
+            <input id="current-password" type="password" placeholder="••••••••">
           </div>
           <div class="settings-row">
             <div class="field">
               <label>New password</label>
-              <input type="password" placeholder="At least 8 characters">
+              <input id="new-password" type="password" placeholder="At least 8 characters">
             </div>
             <div class="field">
               <label>Confirm new password</label>
-              <input type="password" placeholder="Re-enter new password">
+              <input id="confirm-password" type="password" placeholder="Re-enter new password">
             </div>
           </div>
-          <button class="btn-secondary" onclick="document.getElementById('force-change-banner').style.display='none'; alert('Password updated. (Demo only — no backend connected.)')">Update password</button>
+          <button class="btn-secondary" onclick="updatePassword()">Update password</button>
         </div>
       </div>
     </div>
@@ -402,11 +403,11 @@
     <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
       <div>
         <div class="sub" style="margin-bottom:2px;">Signed in as</div>
-        <h2 style="margin:0;">hmc@scu.edu</h2>
+        <h2 style="margin:0;" id="organizer-email">hmc@scu.edu</h2>
       </div>
       <div style="text-align:right;">
         <span class="org-badge">Organizer · score entry authorized</span>
-        <div style="margin-top:10px;"><a href="#" style="font-size:12px;" onclick="showView('login', document.getElementById('nav-login')); return false;">Log out</a></div>
+        <div style="margin-top:10px;"><a href="#" style="font-size:12px;" onclick="signOut(); return false;">Log out</a></div>
       </div>
     </div>
 
@@ -652,9 +653,12 @@
 </footer>
 
 <script>
+// ---- Connect to your Supabase project ----
+const SUPABASE_URL = 'https://bfurbnjvilmgtfhfobzw.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_fUXqENSPZZIphTFRTY6IiQ_fY-qWHUi';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 let selectedRole = 'competitor';
-const ORGANIZER_EMAIL = 'hmc@scu.edu';
-const ORGANIZER_PASSWORD = 'privacyr@ghtsfall26';
 
 function showView(id, btn){
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -669,20 +673,84 @@ function setRole(role, btn){
   document.getElementById('role-organizer').classList.toggle('active', role === 'organizer');
 }
 
-function signIn(){
+async function signIn(){
   const email = document.getElementById('login-email').value.trim().toLowerCase();
   const password = document.getElementById('login-password').value;
 
-  if (selectedRole === 'organizer') {
-    if (email === ORGANIZER_EMAIL && password === ORGANIZER_PASSWORD) {
-      showView('organizer', null);
-    } else {
-      alert('Incorrect organizer email or password. (Demo credential: hmc@scu.edu)');
-    }
+  if (!email || !password) {
+    alert('Enter both an email address and a password.');
     return;
   }
 
-  showView('dashboard', null);
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    alert('Sign in failed: ' + error.message);
+    return;
+  }
+
+  // Look up this person's role and force-change-password flag from their profile
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('role, email, must_change_password')
+    .eq('id', data.user.id)
+    .single();
+
+  if (profileError || !profile) {
+    alert('Signed in, but no profile record was found for this account. Contact hmc@scu.edu.');
+    return;
+  }
+
+  if (selectedRole === 'organizer' && profile.role !== 'organizer') {
+    alert('This account does not have organizer access.');
+    await supabase.auth.signOut();
+    return;
+  }
+
+  if (profile.role === 'organizer') {
+    document.getElementById('organizer-email').textContent = profile.email;
+    showView('organizer', null);
+  } else {
+    document.getElementById('dashboard-name').textContent = profile.email;
+    document.getElementById('force-change-banner').style.display = profile.must_change_password ? 'flex' : 'none';
+    showView('dashboard', null);
+  }
+}
+
+async function signOut(){
+  await supabase.auth.signOut();
+  showView('login', document.getElementById('nav-login'));
+}
+
+async function updatePassword(){
+  const newPassword = document.getElementById('new-password').value;
+  const confirmPassword = document.getElementById('confirm-password').value;
+
+  if (!newPassword || newPassword.length < 8) {
+    alert('New password must be at least 8 characters.');
+    return;
+  }
+  if (newPassword !== confirmPassword) {
+    alert('New password and confirmation do not match.');
+    return;
+  }
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) { alert('You are not signed in.'); return; }
+
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) {
+    alert('Could not update password: ' + error.message);
+    return;
+  }
+
+  await supabase.from('profiles').update({ must_change_password: false }).eq('id', user.id);
+
+  document.getElementById('force-change-banner').style.display = 'none';
+  document.getElementById('current-password').value = '';
+  document.getElementById('new-password').value = '';
+  document.getElementById('confirm-password').value = '';
+  alert('Password updated.');
 }
 </script>
 
