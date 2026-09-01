@@ -118,25 +118,16 @@
   /* ---- DASHBOARD VIEW ---- */
   .dash-grid{
     display:grid; grid-template-columns:1.3fr 1fr; gap:20px;
-    grid-template-areas:
-      "round1 results"
-      "round2 settings";
   }
-  .dash-round1{ grid-area:round1; margin-bottom:0; }
-  .dash-round2{ grid-area:round2; margin-bottom:0; }
-  .dash-results{ grid-area:results; margin-bottom:0; }
-  .dash-settings{ grid-area:settings; margin-bottom:0; }
+  .dash-round{ grid-column:1; margin-bottom:0; }
+  .dash-results{ grid-column:2; order:1; margin-bottom:0; }
+  .dash-settings{ grid-column:2; order:3; margin-bottom:0; }
 
   @media (max-width:640px){
-    .dash-grid{
-      grid-template-columns:1fr;
-      grid-template-areas:
-        "results"
-        "round1"
-        "round2"
-        "settings";
-      gap:16px;
-    }
+    .dash-grid{ grid-template-columns:1fr; gap:16px; }
+    .dash-round{ grid-column:1; order:2; }
+    .dash-results{ grid-column:1; }
+    .dash-settings{ grid-column:1; }
   }
   .badge{
     display:inline-block; font-size:11px; font-weight:600; padding:3px 9px;
@@ -352,17 +343,7 @@
     </div>
 
     <div class="dash-grid">
-      <div class="card dash-round1">
-          <h2 id="dash-round1-title">Preliminary Round</h2>
-          <div class="sub">Updates automatically as rounds are released</div>
-          <div id="dash-round1-body"><p style="font-size:13px;color:var(--stone);margin:0;">Loading…</p></div>
-      </div>
-
-      <div class="card dash-round2">
-          <h2 id="dash-round2-title">Preliminary Round</h2>
-          <div class="sub">Updates automatically as rounds are released</div>
-          <div id="dash-round2-body"><p style="font-size:13px;color:var(--stone);margin:0;">Loading…</p></div>
-      </div>
+      <div id="dash-rounds-anchor" style="display:contents;"></div>
 
       <div class="card dash-results">
           <h2>My results</h2>
@@ -411,42 +392,97 @@
     </div>
 
     <div class="card">
-      <h2>Assign Competitors</h2>
-      <div class="sub">Set each competitor's round, room, call time, and side. Team name is optional and shows in bold italics next to their name on the scoring sheet.</div>
-
-      <div class="field">
-        <label>Round</label>
-        <select id="assign-round"></select>
+      <h2>Manage Rounds</h2>
+      <div class="sub">Add a round whenever you're ready to schedule it — you don't need all six set up at once.</div>
+      <div class="settings-row">
+        <div class="field">
+          <label>Round name</label>
+          <input id="new-round-name" type="text" placeholder="e.g. Prelim 1">
+        </div>
+        <div class="field">
+          <label>Date</label>
+          <input id="new-round-date" type="date">
+        </div>
       </div>
       <div class="field">
-        <label>Competitor</label>
-        <select id="assign-competitor"></select>
+        <label>Prep room (optional)</label>
+        <input id="new-round-prep" type="text" placeholder="e.g. Charney 210">
+      </div>
+      <button class="btn-primary" style="width:auto;" onclick="createRound()">Add round</button>
+      <div id="round-status-msg" style="font-size:12px;color:var(--stone);margin-top:10px;"></div>
+    </div>
+
+    <div class="card">
+      <h2>Manage Teams</h2>
+      <div class="sub">Create a team and assign its two competitors. Seeds and brief scores can be added later once they're in.</div>
+
+      <div class="field">
+        <label>Team name</label>
+        <input id="new-team-name" type="text" placeholder="e.g. Subpeona Colada">
       </div>
       <div class="settings-row">
         <div class="field">
-          <label>Team name (optional)</label>
-          <input id="assign-team" type="text" placeholder="e.g. Team Falcon">
+          <label>Competitor 1</label>
+          <select id="new-team-comp1"></select>
         </div>
         <div class="field">
-          <label>Side</label>
-          <select id="assign-side">
-            <option value="Petitioner">Petitioner</option>
-            <option value="Respondent">Respondent</option>
-          </select>
+          <label>Competitor 2</label>
+          <select id="new-team-comp2"></select>
         </div>
+      </div>
+      <button class="btn-primary" style="width:auto;" onclick="createTeam()">Create team</button>
+      <div id="team-status-msg" style="font-size:12px;color:var(--stone);margin-top:10px;"></div>
+
+      <div style="border-top:1px solid var(--border);margin-top:20px;padding-top:18px;">
+        <div class="field">
+          <label>Set / update seed &amp; brief score</label>
+          <select id="seed-team-select"></select>
+        </div>
+        <div class="settings-row">
+          <div class="field">
+            <label>Seed number (1–12)</label>
+            <input id="seed-value" type="number" min="1" placeholder="e.g. 1">
+          </div>
+          <div class="field">
+            <label>Brief score (optional)</label>
+            <input id="seed-brief-score" type="number" step="0.01" placeholder="optional">
+          </div>
+        </div>
+        <button class="btn-secondary" onclick="setTeamSeed()">Save seed</button>
+        <div id="seed-status-msg" style="font-size:12px;color:var(--stone);margin-top:10px;"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Assign Matchup</h2>
+      <div class="sub">Pick the round, room, and call time, then the two teams facing each other. Both members of each team are added automatically, on their team's side.</div>
+
+      <div class="field">
+        <label>Round</label>
+        <select id="matchup-round"></select>
       </div>
       <div class="settings-row">
         <div class="field">
           <label>Room</label>
-          <input id="assign-room" type="text" placeholder="e.g. Charney 106">
+          <input id="matchup-room" type="text" placeholder="e.g. Charney 106">
         </div>
         <div class="field">
           <label>Call time</label>
-          <input id="assign-call-time" type="text" placeholder="e.g. 1:30 PM">
+          <input id="matchup-call-time" type="text" placeholder="e.g. 5:45 PM">
         </div>
       </div>
-      <button class="btn-primary" style="width:auto;" onclick="saveAssignment()">Save assignment</button>
-      <div id="assign-status" style="font-size:12px;color:var(--stone);margin-top:10px;"></div>
+      <div class="settings-row">
+        <div class="field">
+          <label>Petitioner team</label>
+          <select id="matchup-team-pet"></select>
+        </div>
+        <div class="field">
+          <label>Respondent team</label>
+          <select id="matchup-team-resp"></select>
+        </div>
+      </div>
+      <button class="btn-primary" style="width:auto;" onclick="saveMatchup()">Save matchup</button>
+      <div id="matchup-status-msg" style="font-size:12px;color:var(--stone);margin-top:10px;"></div>
     </div>
 
     <div class="card">
@@ -463,21 +499,7 @@
 
     <div id="scoring-cards"></div>
 
-    <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
-      <div>
-        <h2 style="margin-bottom:4px;">Preliminary Round 1</h2>
-        <div class="sub" id="round1-status" style="margin-bottom:0;">Loading status…</div>
-      </div>
-      <button class="btn-primary" style="width:auto;" onclick="publishRound('Preliminary Round 1')">Publish results to competitors</button>
-    </div>
-
-    <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
-      <div>
-        <h2 style="margin-bottom:4px;">Preliminary Round 2</h2>
-        <div class="sub" id="round2-status" style="margin-bottom:0;">Loading status…</div>
-      </div>
-      <button class="btn-primary" style="width:auto;" onclick="publishRound('Preliminary Round 2')">Publish results to competitors</button>
-    </div>
+    <div id="publish-rounds-container"></div>
 
     <div class="card">
       <h2>Access note</h2>
@@ -731,11 +753,13 @@ async function loadDashboardData(userId){
 
   const { data: rounds, error: roundsError } = await supabase
     .from('rounds')
-    .select('id, round_name, case_name, round_date, published')
+    .select('id, round_name, case_name, round_date, prep_room, published')
     .order('round_date');
 
+  const anchor = document.getElementById('dash-rounds-anchor');
+
   if (roundsError) {
-    document.getElementById('dash-round1-body').innerHTML = '<p style="font-size:13px;color:var(--stone);">Could not load rounds.</p>';
+    anchor.innerHTML = '<div class="card dash-round"><p style="font-size:13px;color:var(--stone);margin:0;">Could not load rounds.</p></div>';
     return;
   }
 
@@ -747,8 +771,32 @@ async function loadDashboardData(userId){
   const assignByRound = {};
   (assignments || []).forEach(a => assignByRound[a.round_id] = a);
 
-  renderDashboardRoundCard('dash-round1', rounds && rounds[0], assignByRound);
-  renderDashboardRoundCard('dash-round2', rounds && rounds[1], assignByRound);
+  anchor.innerHTML = '';
+  if (!rounds || !rounds.length) {
+    anchor.innerHTML = '<div class="card dash-round"><h2>Rounds</h2><p style="font-size:13px;color:var(--stone);margin:0;">No rounds have been scheduled yet.</p></div>';
+  } else {
+    rounds.forEach(round => {
+      const card = document.createElement('div');
+      card.className = 'card dash-round';
+      const a = assignByRound[round.id];
+      const title = `${round.round_name} — ${formatRoundDate(round.round_date)}`;
+      let body;
+      if (!a) {
+        body = '<p style="font-size:13px;color:var(--stone);margin:0;">You have not been assigned a room for this round yet.</p>';
+      } else {
+        body = `
+          <div class="assignment-row"><div><div class="label">Case</div><div class="value case-caption">${round.case_name}</div></div></div>
+          <div class="assignment-row"><div><div class="label">Room</div><div class="value">${a.room || 'TBD'}</div></div></div>
+          <div class="assignment-row"><div><div class="label">Call time</div><div class="value">${a.call_time || 'TBD'}</div></div></div>
+          <div class="assignment-row"><div><div class="label">Side</div><div class="value">${a.side || 'TBD'}</div></div></div>`;
+      }
+      card.innerHTML = `
+        <h2>${title}</h2>
+        <div class="sub">Updates automatically as rounds are released</div>
+        ${body}`;
+      anchor.appendChild(card);
+    });
+  }
 
   const resultsBody = document.getElementById('dash-results-body');
   resultsBody.innerHTML = '';
@@ -784,32 +832,6 @@ async function loadDashboardData(userId){
   }
 }
 
-function renderDashboardRoundCard(prefix, round, assignByRound){
-  const titleEl = document.getElementById(prefix + '-title');
-  const bodyEl = document.getElementById(prefix + '-body');
-  if (!titleEl || !bodyEl) return;
-
-  if (!round) {
-    titleEl.textContent = 'Preliminary Round';
-    bodyEl.innerHTML = '<p style="font-size:13px;color:var(--stone);margin:0;">No round scheduled.</p>';
-    return;
-  }
-
-  titleEl.textContent = `${round.round_name} — ${formatRoundDate(round.round_date)}`;
-
-  const a = assignByRound[round.id];
-  if (!a) {
-    bodyEl.innerHTML = '<p style="font-size:13px;color:var(--stone);margin:0;">You have not been assigned a room for this round yet.</p>';
-    return;
-  }
-
-  bodyEl.innerHTML = `
-    <div class="assignment-row"><div><div class="label">Case</div><div class="value case-caption">${round.case_name}</div></div></div>
-    <div class="assignment-row"><div><div class="label">Room</div><div class="value">${a.room || 'TBD'}</div></div></div>
-    <div class="assignment-row"><div><div class="label">Call time</div><div class="value">${a.call_time || 'TBD'}</div></div></div>
-    <div class="assignment-row"><div><div class="label">Side</div><div class="value">${a.side || 'TBD'}</div></div></div>`;
-}
-
 // ================= ORGANIZER CONSOLE: real data ==================
 async function loadOrganizerData(){
   let supabase;
@@ -825,72 +847,199 @@ async function loadOrganizerData(){
   const roundOptions = (rounds || [])
     .map(r => `<option value="${r.id}">${r.round_name} — ${formatRoundDate(r.round_date)}</option>`)
     .join('');
-  document.getElementById('assign-round').innerHTML = roundOptions;
+  document.getElementById('matchup-round').innerHTML = roundOptions;
   document.getElementById('scoring-round').innerHTML = roundOptions;
 
-  const { data: competitors, error: compError } = await supabase
+  const { data: teams } = await supabase
+    .from('teams')
+    .select('id, team_name, seed, brief_score')
+    .order('seed', { nullsFirst: false })
+    .order('team_name');
+
+  const teamLabel = t => `${t.seed ? 'Seed ' + t.seed : 'Unseeded'} — ${t.team_name}`;
+  const teamOptions = (teams || []).map(t => `<option value="${t.id}">${teamLabel(t)}</option>`).join('');
+  document.getElementById('matchup-team-pet').innerHTML = teamOptions;
+  document.getElementById('matchup-team-resp').innerHTML = teamOptions;
+  document.getElementById('seed-team-select').innerHTML = teamOptions;
+
+  const { data: competitors } = await supabase
     .from('profiles')
-    .select('id, email, team_name')
+    .select('id, email, team_id')
     .eq('role', 'competitor')
     .order('email');
 
-  if (!compError) {
-    document.getElementById('assign-competitor').innerHTML = (competitors || [])
-      .map(c => `<option value="${c.id}">${c.email}${c.team_name ? ' — ' + c.team_name : ''}</option>`)
-      .join('');
-  }
+  const teamsById = {};
+  (teams || []).forEach(t => teamsById[t.id] = t);
+  const competitorLabel = c => `${c.email}${c.team_id && teamsById[c.team_id] ? ' (Team: ' + teamsById[c.team_id].team_name + ')' : ''}`;
+  const competitorOptions = (competitors || []).map(c => `<option value="${c.id}">${competitorLabel(c)}</option>`).join('');
+  document.getElementById('new-team-comp1').innerHTML = competitorOptions;
+  document.getElementById('new-team-comp2').innerHTML = competitorOptions;
 
-  const r1 = (rounds || []).find(r => r.round_name === 'Preliminary Round 1');
-  const r2 = (rounds || []).find(r => r.round_name === 'Preliminary Round 2');
-  const round1StatusEl = document.getElementById('round1-status');
-  const round2StatusEl = document.getElementById('round2-status');
-  if (round1StatusEl) round1StatusEl.textContent = r1 ? (r1.published ? 'Published to competitors' : 'Not yet published') : 'Round not found';
-  if (round2StatusEl) round2StatusEl.textContent = r2 ? (r2.published ? 'Published to competitors' : 'Not yet published') : 'Round not found';
+  const publishContainer = document.getElementById('publish-rounds-container');
+  publishContainer.innerHTML = '';
+  (rounds || []).forEach(r => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.display = 'flex';
+    card.style.justifyContent = 'space-between';
+    card.style.alignItems = 'center';
+    card.innerHTML = `
+      <div>
+        <h2 style="margin-bottom:4px;">${r.round_name}</h2>
+        <div class="sub" style="margin-bottom:0;">${r.published ? 'Published to competitors' : 'Not yet published'}</div>
+      </div>
+      <button class="btn-primary" style="width:auto;" onclick="publishRound('${r.id}')">Publish results to competitors</button>`;
+    publishContainer.appendChild(card);
+  });
+  if (!rounds || !rounds.length) {
+    publishContainer.innerHTML = '<div class="card"><p style="font-size:13px;color:var(--stone);margin:0;">No rounds yet — add one above.</p></div>';
+  }
 
   if (rounds && rounds.length) loadScoringRound();
 }
 
-async function saveAssignment(){
+async function createRound(){
   let supabase;
   try { supabase = getSupabase(); } catch (e) { alert(e.message); return; }
 
-  const round_id = document.getElementById('assign-round').value;
-  const competitor_id = document.getElementById('assign-competitor').value;
-  const team_name = document.getElementById('assign-team').value.trim();
-  const side = document.getElementById('assign-side').value;
-  const room = document.getElementById('assign-room').value.trim();
-  const call_time = document.getElementById('assign-call-time').value.trim();
+  const round_name = document.getElementById('new-round-name').value.trim();
+  const round_date = document.getElementById('new-round-date').value || null;
+  const prep_room = document.getElementById('new-round-prep').value.trim() || null;
 
-  if (!round_id || !competitor_id || !room) {
-    alert('Round, competitor, and room are required.');
-    return;
-  }
+  if (!round_name) { alert('Round name is required.'); return; }
 
-  const { error: assignError } = await supabase
-    .from('assignments')
-    .upsert({ round_id, competitor_id, room, call_time, side }, { onConflict: 'round_id,competitor_id' });
+  const { error } = await supabase.from('rounds').insert({ round_name, round_date, prep_room, published: false });
+  if (error) { alert('Could not add round: ' + error.message); return; }
 
-  if (assignError) { alert('Could not save assignment: ' + assignError.message); return; }
-
-  if (team_name) {
-    const { error: teamError } = await supabase.from('profiles').update({ team_name }).eq('id', competitor_id);
-    if (teamError) { alert('Assignment saved, but team name failed to save: ' + teamError.message); return; }
-  }
-
-  const statusEl = document.getElementById('assign-status');
-  statusEl.textContent = 'Saved.';
-  setTimeout(() => { statusEl.textContent = ''; }, 2500);
+  document.getElementById('new-round-name').value = '';
+  document.getElementById('new-round-date').value = '';
+  document.getElementById('new-round-prep').value = '';
+  const msg = document.getElementById('round-status-msg');
+  msg.textContent = 'Round added.';
+  setTimeout(() => { msg.textContent = ''; }, 2500);
 
   loadOrganizerData();
 }
 
-async function publishRound(roundName){
+async function createTeam(){
   let supabase;
   try { supabase = getSupabase(); } catch (e) { alert(e.message); return; }
 
-  const { error } = await supabase.from('rounds').update({ published: true }).eq('round_name', roundName);
+  const team_name = document.getElementById('new-team-name').value.trim();
+  const comp1 = document.getElementById('new-team-comp1').value;
+  const comp2 = document.getElementById('new-team-comp2').value;
+
+  if (!team_name || !comp1 || !comp2) { alert('Team name and both competitors are required.'); return; }
+  if (comp1 === comp2) { alert('Pick two different competitors.'); return; }
+
+  const { data: team, error: teamError } = await supabase
+    .from('teams')
+    .insert({ team_name })
+    .select()
+    .single();
+
+  if (teamError) { alert('Could not create team: ' + teamError.message); return; }
+
+  const { error: updateError } = await supabase
+    .from('profiles')
+    .update({ team_id: team.id })
+    .in('id', [comp1, comp2]);
+
+  if (updateError) { alert('Team created, but linking competitors failed: ' + updateError.message); return; }
+
+  document.getElementById('new-team-name').value = '';
+  const msg = document.getElementById('team-status-msg');
+  msg.textContent = 'Team created.';
+  setTimeout(() => { msg.textContent = ''; }, 2500);
+
+  loadOrganizerData();
+}
+
+async function setTeamSeed(){
+  let supabase;
+  try { supabase = getSupabase(); } catch (e) { alert(e.message); return; }
+
+  const team_id = document.getElementById('seed-team-select').value;
+  const seedRaw = document.getElementById('seed-value').value;
+  const briefRaw = document.getElementById('seed-brief-score').value;
+
+  if (!team_id) { alert('Choose a team first.'); return; }
+
+  const updates = {};
+  if (seedRaw !== '') updates.seed = parseInt(seedRaw, 10);
+  if (briefRaw !== '') updates.brief_score = parseFloat(briefRaw);
+
+  if (!Object.keys(updates).length) { alert('Enter a seed and/or brief score.'); return; }
+
+  const { error } = await supabase.from('teams').update(updates).eq('id', team_id);
+  if (error) { alert('Could not save seed: ' + error.message); return; }
+
+  document.getElementById('seed-value').value = '';
+  document.getElementById('seed-brief-score').value = '';
+  const msg = document.getElementById('seed-status-msg');
+  msg.textContent = 'Saved.';
+  setTimeout(() => { msg.textContent = ''; }, 2500);
+
+  loadOrganizerData();
+}
+
+async function saveMatchup(){
+  let supabase;
+  try { supabase = getSupabase(); } catch (e) { alert(e.message); return; }
+
+  const round_id = document.getElementById('matchup-round').value;
+  const room = document.getElementById('matchup-room').value.trim();
+  const call_time = document.getElementById('matchup-call-time').value.trim();
+  const team_pet = document.getElementById('matchup-team-pet').value;
+  const team_resp = document.getElementById('matchup-team-resp').value;
+
+  if (!round_id || !room || !team_pet || !team_resp) {
+    alert('Round, room, and both teams are required.');
+    return;
+  }
+  if (team_pet === team_resp) { alert('Pick two different teams.'); return; }
+
+  const { data: members, error: memberError } = await supabase
+    .from('profiles')
+    .select('id, team_id')
+    .in('team_id', [team_pet, team_resp]);
+
+  if (memberError) { alert('Could not load team members: ' + memberError.message); return; }
+  if (!members || members.length < 4) {
+    alert('One or both teams do not have two competitors assigned yet — check Manage Teams.');
+    return;
+  }
+
+  const rows = members.map(m => ({
+    round_id,
+    competitor_id: m.id,
+    room,
+    call_time,
+    side: m.team_id === team_pet ? 'Petitioner' : 'Respondent'
+  }));
+
+  const { error: assignError } = await supabase
+    .from('assignments')
+    .upsert(rows, { onConflict: 'round_id,competitor_id' });
+
+  if (assignError) { alert('Could not save matchup: ' + assignError.message); return; }
+
+  document.getElementById('matchup-room').value = '';
+  document.getElementById('matchup-call-time').value = '';
+  const msg = document.getElementById('matchup-status-msg');
+  msg.textContent = 'Matchup saved.';
+  setTimeout(() => { msg.textContent = ''; }, 2500);
+
+  loadScoringRound();
+}
+
+async function publishRound(roundId){
+  let supabase;
+  try { supabase = getSupabase(); } catch (e) { alert(e.message); return; }
+
+  const { error } = await supabase.from('rounds').update({ published: true }).eq('id', roundId);
   if (error) { alert('Could not publish: ' + error.message); return; }
-  alert(roundName + ' published to competitors.');
+  alert('Published to competitors.');
   loadOrganizerData();
 }
 
@@ -912,18 +1061,25 @@ async function loadScoringRound(){
   if (aError) { container.innerHTML = `<div class="card"><p style="font-size:13px;color:var(--stone);margin:0;">Could not load assignments: ${aError.message}</p></div>`; return; }
 
   if (!assignments || !assignments.length) {
-    container.innerHTML = '<div class="card"><p style="font-size:13px;color:var(--stone);margin:0;">No competitors assigned to this round yet — use Assign Competitors above.</p></div>';
+    container.innerHTML = '<div class="card"><p style="font-size:13px;color:var(--stone);margin:0;">No competitors assigned to this round yet — use Assign Matchup above.</p></div>';
     return;
   }
 
   const competitorIds = [...new Set(assignments.map(a => a.competitor_id))];
   const { data: profiles } = await supabase
     .from('profiles')
-    .select('id, email, team_name')
+    .select('id, email, team_id')
     .in('id', competitorIds);
 
   const profilesById = {};
   (profiles || []).forEach(p => profilesById[p.id] = p);
+
+  const teamIds = [...new Set((profiles || []).map(p => p.team_id).filter(Boolean))];
+  let teamsById = {};
+  if (teamIds.length) {
+    const { data: teams } = await supabase.from('teams').select('id, team_name').in('id', teamIds);
+    (teams || []).forEach(t => teamsById[t.id] = t);
+  }
 
   const { data: ballots } = await supabase
     .from('ballots')
@@ -947,9 +1103,10 @@ async function loadScoringRound(){
 
     let rowsHtml = '';
     byRoom[room].forEach(a => {
-      const p = profilesById[a.competitor_id] || { email: '(unknown)', team_name: '' };
+      const p = profilesById[a.competitor_id] || { email: '(unknown)', team_id: null };
+      const team = p.team_id ? teamsById[p.team_id] : null;
       const b = ballotMap[a.competitor_id] || {};
-      const teamHtml = p.team_name ? ` <span style="font-style:italic;font-weight:700;">${p.team_name}</span>` : '';
+      const teamHtml = team ? ` <span style="font-style:italic;font-weight:700;">${team.team_name}</span>` : '';
       const j1 = b.judge_1_score !== undefined && b.judge_1_score !== null ? b.judge_1_score : '';
       const j2 = b.judge_2_score !== undefined && b.judge_2_score !== null ? b.judge_2_score : '';
       const j3 = b.judge_3_score !== undefined && b.judge_3_score !== null ? b.judge_3_score : '';
@@ -966,7 +1123,7 @@ async function loadScoringRound(){
 
     card.innerHTML = `
       <h2>Enter Score Reports</h2>
-      <div class="sub">${roundLabel} · <span class="case-caption">Patel et al. v. United States et al.</span> · ${room}</div>
+      <div class="sub">${roundLabel} · <span class="case-caption">Patel et al. v. United States et al.</span> · ${room}${byRoom[room][0].call_time ? ' · ' + byRoom[room][0].call_time : ''}</div>
       <div class="table-scroll">
         <table class="org-table">
           <thead><tr><th>Competitor</th><th>Side</th><th>Judge 1</th><th>Judge 2</th><th>Judge 3</th><th></th></tr></thead>
