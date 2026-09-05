@@ -1,0 +1,1950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCU Moot Court Competition</title>
+<style>
+  :root{
+    --scu-red:#A32035;
+    --bronco-red:#862633;
+    --stone:#758592;
+    --stone-light:#eef1f3;
+    --black:#0A0A0A;
+    --white:#FFFFFF;
+    --success:#2E7D4F;
+    --border:#dfe3e6;
+    --font-sans:'Avenir Next','Century Gothic',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --font-serif:'Minion Pro',Georgia,'Times New Roman',serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:var(--font-sans); color:var(--black);
+    background:#f6f5f2; line-height:1.5;
+  }
+  a{color:var(--scu-red);}
+
+  /* ---- top brand bar ---- */
+  .brand-bar{
+    background:var(--scu-red); color:#fff; padding:10px 32px;
+    display:flex; align-items:center; justify-content:space-between; font-size:13px;
+    letter-spacing:.02em;
+  }
+  .brand-bar span.dept{ opacity:.9; }
+
+  header.site{
+    background:#fff; border-bottom:1px solid var(--border);
+    padding:18px 32px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .site-title{ display:flex; flex-direction:column; }
+  .site-title .eyebrow{ font-size:12px; color:var(--stone); font-weight:500; }
+  .site-title h1{
+    font-family:var(--font-serif); font-size:26px; margin:2px 0 0; font-weight:600;
+    color:var(--black); font-style:italic;
+  }
+  nav.tabs{ display:flex; gap:6px; }
+  nav.tabs button{
+    font-family:var(--font-sans); font-size:14px; font-weight:500;
+    background:none; border:1px solid transparent; padding:9px 16px; border-radius:4px;
+    cursor:pointer; color:var(--stone);
+  }
+  nav.tabs button.active{
+    background:var(--stone-light); color:var(--scu-red); border-color:var(--border);
+  }
+
+  /* ---- mobile header: stack signature + case name above a full-width nav row ---- */
+  @media (max-width: 640px){
+    header.site{ flex-direction:column; align-items:flex-start; gap:14px; padding:16px 20px; }
+    .site-title{ width:100%; max-width:100%; }
+    .site-title h1{
+      font-size:clamp(13px, 4.6vw, 21px);
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      max-width:100%;
+    }
+    nav.tabs{ width:100%; }
+    nav.tabs button{ flex:1; text-align:center; padding:10px 8px; }
+  }
+
+  main{ max-width:1080px; margin:0 auto; padding:36px 24px 80px; }
+  .view{ display:none; }
+  .view.active{ display:block; }
+
+  /* ---- shared card ---- */
+  .card{
+    background:#fff; border:1px solid var(--border); border-radius:6px;
+    padding:24px 26px; margin-bottom:20px;
+  }
+  .card h2{
+    font-family:var(--font-serif); font-size:19px; margin:0 0 4px; color:var(--black);
+  }
+  .card .sub{ color:var(--stone); font-size:13px; margin-bottom:16px; }
+
+  /* ---- LOGIN VIEW ---- */
+  .login-wrap{
+    display:flex; justify-content:center; padding-top:40px;
+  }
+  .login-card{
+    width:380px; background:#fff; border:1px solid var(--border); border-radius:8px;
+    padding:0; overflow:hidden;
+  }
+  .login-card .top-stripe{ height:6px; background:var(--scu-red); }
+  .login-card .inner{ padding:32px 30px 28px; }
+  .login-card h2{ font-family:var(--font-serif); font-size:22px; margin:0 0 6px; }
+  .login-card p.tag{ color:var(--stone); font-size:13px; margin:0 0 24px; }
+  .field{ margin-bottom:16px; }
+  .field label{ display:block; font-size:12px; font-weight:500; color:var(--stone); margin-bottom:5px; }
+  .field input{
+    width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:4px;
+    font-size:14px; font-family:var(--font-sans);
+  }
+  .field select{
+    width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:4px;
+    font-size:14px; font-family:var(--font-sans); background:#fff; color:var(--black);
+    max-width:100%;
+  }
+  .btn-primary{
+    width:100%; background:var(--scu-red); color:#fff; border:none; padding:11px;
+    border-radius:4px; font-size:14px; font-weight:500; cursor:pointer; margin-top:6px;
+  }
+  .btn-primary:hover{ background:var(--bronco-red); }
+  .login-foot{ margin-top:18px; font-size:12px; color:var(--stone); text-align:center; }
+  .role-toggle{ display:flex; gap:8px; margin-bottom:20px; }
+  .role-toggle button{
+    flex:1; padding:8px; font-size:12px; font-weight:500; border:1px solid var(--border);
+    background:var(--stone-light); border-radius:4px; cursor:pointer; color:var(--stone);
+  }
+  .role-toggle button.active{ background:var(--scu-red); color:#fff; border-color:var(--scu-red); }
+  .privacy-note{
+    display:flex; gap:8px; align-items:flex-start; background:var(--stone-light);
+    border:1px solid var(--border); border-radius:4px; padding:10px 12px; font-size:12px;
+    color:var(--stone); margin-top:18px;
+  }
+
+  /* ---- DASHBOARD VIEW ---- */
+  /* Two independent columns: round cards stack on the left, results + settings on the right.
+     (Placing every card straight into one grid let auto-placement push "My results" down
+     beside the last round card — with six rounds it ended up at the bottom of the page.) */
+  .dash-grid{
+    display:grid; grid-template-columns:1.3fr 1fr; gap:20px; align-items:start;
+  }
+  .dash-col{ display:flex; flex-direction:column; gap:20px; min-width:0; }
+  .dash-round, .dash-results, .dash-settings{ margin-bottom:0; }
+
+  @media (max-width:640px){
+    .dash-grid{ grid-template-columns:1fr; gap:16px; }
+    .dash-col{ display:contents; }      /* cards join the single column and follow the order below */
+    .dash-results{ order:1; }
+    .dash-round{ order:2; }
+    .dash-settings{ order:3; }
+  }
+  .badge{
+    display:inline-block; font-size:11px; font-weight:600; padding:3px 9px;
+    border-radius:20px; letter-spacing:.02em;
+  }
+  .badge.live{ background:#fdeceb; color:var(--scu-red); }
+  .badge.published{ background:#e7f3ec; color:var(--success); }
+  .badge.pending{ background:var(--stone-light); color:var(--stone); }
+
+  .assignment-row{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:14px 0; border-bottom:1px solid var(--border);
+  }
+  .assignment-row:last-child{ border-bottom:none; }
+  .assignment-row .label{ font-size:12px; color:var(--stone); }
+  .assignment-row .value{ font-size:15px; font-weight:500; }
+
+  table.scores{ width:100%; border-collapse:collapse; font-size:13px; }
+  table.scores th{
+    text-align:left; font-size:11px; text-transform:none; color:var(--stone);
+    font-weight:500; padding:8px 6px; border-bottom:1px solid var(--border);
+  }
+  table.scores td{ padding:9px 6px; border-bottom:1px solid var(--border); }
+  table.scores tr:last-child td{ border-bottom:none; }
+  .stat-pair{ display:flex; gap:22px; margin:14px 0 6px; }
+  .stat .num{ font-family:var(--font-serif); font-size:28px; color:var(--black); }
+  .stat .lbl{ font-size:11px; color:var(--stone); text-transform:uppercase; letter-spacing:.04em; }
+  .tiebreak-note{
+    font-size:12px; color:var(--stone); background:var(--stone-light); border-radius:4px;
+    padding:10px 12px; margin-top:14px; line-height:1.5;
+  }
+  .announce-item{ padding:12px 0; border-bottom:1px solid var(--border); }
+  .announce-item:last-child{ border-bottom:none; }
+  .announce-item .time{ font-size:11px; color:var(--stone); }
+  .announce-item .msg{ font-size:14px; margin-top:3px; }
+  .lock-note{
+    display:flex; gap:8px; align-items:center; font-size:12px; color:var(--stone);
+    margin-top:8px;
+  }
+
+  /* ---- JUDGES VIEW ---- */
+  .judge-hero{
+    background:var(--black); color:#fff; border-radius:8px; padding:48px 40px;
+    margin-bottom:24px; position:relative; overflow:hidden;
+  }
+  .judge-hero:before{
+    content:""; position:absolute; right:-60px; top:-60px; width:220px; height:220px;
+    border:1px solid rgba(255,255,255,.15); border-radius:50%;
+  }
+  .judge-hero .eyebrow{ color:#e7b8c0; font-size:13px; font-weight:500; }
+  .judge-hero h2{
+    font-family:var(--font-serif); font-size:34px; margin:8px 0 14px; max-width:560px;
+    font-weight:600; line-height:1.2;
+  }
+  .judge-hero p{ max-width:520px; color:#d8d8d8; font-size:15px; margin-bottom:26px; }
+  .btn-cta{
+    display:inline-block; background:var(--scu-red); color:#fff; padding:13px 26px;
+    border-radius:4px; font-size:14px; font-weight:600; text-decoration:none;
+  }
+  .btn-cta:hover{ background:var(--bronco-red); }
+  .info-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-bottom:20px; }
+  .info-card{ background:#fff; border:1px solid var(--border); border-radius:6px; padding:20px; }
+  .info-card .icon-label{ font-size:11px; color:var(--stone); text-transform:uppercase; letter-spacing:.04em; margin-bottom:8px; }
+  .info-card h3{ font-size:16px; margin:0 0 8px; font-family:var(--font-serif); }
+  .info-card p{ font-size:13px; color:#333; margin:0; }
+  .faq-item{ padding:16px 0; border-bottom:1px solid var(--border); }
+  .faq-item:last-child{ border-bottom:none; }
+  .faq-item h4{ margin:0 0 6px; font-size:14px; }
+  .faq-item p{ margin:0; font-size:13px; color:#333; }
+
+  /* ---- accordion dropdowns (Parking Information / Rules) ---- */
+  details.accordion{
+    background:#fff; border:1px solid var(--border); border-radius:6px;
+    margin-bottom:14px; overflow:hidden;
+  }
+  details.accordion summary{
+    list-style:none; cursor:pointer; padding:16px 20px; font-family:var(--font-serif);
+    font-size:16px; font-weight:600; display:flex; justify-content:space-between; align-items:center;
+  }
+  details.accordion summary::-webkit-details-marker{ display:none; }
+  details.accordion summary:after{
+    content:"+"; font-family:var(--font-sans); font-size:18px; color:var(--scu-red); font-weight:400;
+  }
+  details.accordion[open] summary:after{ content:"–"; }
+  details.accordion .accordion-body{
+    padding:0 20px 18px; font-size:13px; color:#333; line-height:1.6;
+  }
+  footer.site{
+    text-align:center; padding:26px; font-size:12px; color:var(--stone);
+    border-top:1px solid var(--border); margin-top:20px;
+  }
+
+  /* ---- first-login / force-change banner ---- */
+  .force-banner{
+    background:#fdeceb; border:1px solid #f2c2c2; color:var(--bronco-red);
+    border-radius:6px; padding:12px 16px; font-size:13px; margin-bottom:20px;
+    display:flex; justify-content:space-between; align-items:center; gap:12px;
+  }
+  .force-banner a{ font-weight:600; white-space:nowrap; }
+
+  /* ---- account settings / change password ---- */
+  .settings-row{ display:flex; gap:12px; }
+  .settings-row .field{ flex:1; }
+  @media (max-width:640px){
+    .settings-row{ flex-direction:column; gap:0; }
+  }
+  .btn-secondary{
+    background:#fff; color:var(--scu-red); border:1px solid var(--scu-red);
+    padding:10px 18px; border-radius:4px; font-size:13px; font-weight:500; cursor:pointer;
+  }
+  .btn-secondary:hover{ background:#fdeceb; }
+
+  /* ---- organizer console ---- */
+  .org-table{ width:100%; border-collapse:collapse; font-size:13px; }
+  .org-table th{
+    text-align:left; font-size:11px; color:var(--stone); font-weight:500;
+    padding:8px 6px; border-bottom:1px solid var(--border);
+  }
+  .org-table td{ padding:8px 6px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  .org-table input[type=number]{
+    width:64px; padding:6px 8px; border:1px solid var(--border); border-radius:4px; font-size:13px;
+  }
+  .org-badge{
+    font-size:11px; font-weight:600; padding:2px 8px; border-radius:20px; background:var(--stone-light); color:var(--stone);
+  }
+  .case-caption{ font-style:italic; }
+  .table-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+
+  /* ---- mobile: squeeze organizer score-entry tables to fit a standard phone width ---- */
+  @media (max-width:640px){
+    .card{ padding:16px 14px; }
+    #organizer .card h2{ font-size:16px; }
+    #organizer .card .sub{ font-size:11.5px; }
+    .org-table{ font-size:11px; }
+    .org-table th, .org-table td{ padding:5px 3px; }
+    .org-table th{ font-size:9.5px; }
+    .org-table input[type=number]{ width:38px; padding:5px 3px; font-size:11px; }
+    .org-table .btn-secondary{ padding:5px 7px; font-size:10.5px; white-space:nowrap; }
+    /* keep the Save / Remove column in view while the rest of the row scrolls sideways */
+    .org-table th:last-child, .org-table td:last-child{
+      position:sticky; right:0; background:#fff; box-shadow:-8px 0 8px -8px rgba(0,0,0,.25);
+    }
+    .org-table tr.feedback-row td{ position:static; box-shadow:none; }
+    .org-table .mean-cell{ display:none; }                 /* room rank lives in Live standings on phones */
+    .feedback-input{ max-width:calc(100vw - 84px); }        /* fits the screen instead of the scrolled table */
+  }
+
+  /* ---- inline status text, toasts, busy buttons ---- */
+  .status-msg{ font-size:12px; color:var(--stone); margin-top:10px; }
+  .status-msg:empty{ display:none; }
+  .status-msg.error{ color:var(--scu-red); }
+  .status-msg.ok{ color:var(--success); }
+  .note{ font-size:13px; color:var(--stone); margin:0; }
+  .muted{ color:var(--stone); }
+  button[disabled]{ opacity:.55; cursor:default; }
+  .btn-primary[disabled]:hover{ background:var(--scu-red); }
+  .btn-secondary[disabled]:hover{ background:#fff; }
+  .toast{
+    position:fixed; left:50%; bottom:24px; transform:translate(-50%, 8px);
+    background:var(--black); color:#fff; padding:10px 16px; border-radius:6px; font-size:13px;
+    max-width:90vw; opacity:0; pointer-events:none; transition:opacity .2s, transform .2s; z-index:100;
+  }
+  .toast.show{ opacity:1; transform:translate(-50%, 0); }
+  .toast.error{ background:var(--scu-red); }
+  @media (prefers-reduced-motion: reduce){ .toast{ transition:none; } }
+  button:focus-visible, a:focus-visible, summary:focus-visible{ outline:2px solid var(--scu-red); outline-offset:2px; }
+
+  /* ---- dashboard results / organizer roster + publish cards ---- */
+  .result-block{ margin-bottom:18px; }
+  .result-block:last-child{ margin-bottom:0; }
+  .result-head .badge{ margin-left:8px; }
+  .roster-heading{ font-family:var(--font-serif); font-size:15px; margin:0 0 8px; }
+  .team-name{ font-weight:600; }
+  .publish-card{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+  .publish-actions{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+
+  /* ---- cumulative standing / feedback (competitor) ---- */
+  .standing-block:empty{ display:none; }
+  .standing-block{ padding-bottom:14px; margin-bottom:14px; border-bottom:1px solid var(--border); }
+  .standing-stats{ flex-wrap:wrap; }
+  .advance-line{ font-size:13px; font-weight:600; color:var(--success); margin-top:8px; }
+  .feedback-quote{
+    font-size:13px; color:#333; background:var(--stone-light); border-left:3px solid var(--scu-red);
+    border-radius:0 4px 4px 0; padding:8px 12px; margin-top:10px; line-height:1.5;
+  }
+  .feedback-quote .label{ display:block; font-size:11px; color:var(--stone); margin-bottom:2px; }
+
+  /* ---- score entry / standings (organizer) ---- */
+  .mean-cell{ white-space:nowrap; font-weight:500; }
+  .mean-cell small{ display:block; font-size:10.5px; color:var(--stone); font-weight:400; }
+  .org-table tr[data-competitor] td{ border-bottom:none; }
+  .org-table tr.feedback-row td{ padding-top:0; padding-bottom:10px; }
+  .feedback-input{ width:100%; padding:6px 8px; border:1px solid var(--border); border-radius:4px; font-size:12px; font-family:var(--font-sans); }
+  .standings-table tr.row-advance td{ background:#f4faf6; }
+  .side-warn{ color:var(--scu-red); font-weight:600; }
+  .check-field{ display:flex; gap:8px; align-items:flex-start; font-size:13px; margin:4px 0 14px; cursor:pointer; }
+  .check-field input{ margin:3px 0 0; }
+</style>
+<!-- TODO before launch: pin an exact version and add an integrity hash, e.g.
+     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.x.y/dist/umd/supabase.min.js"
+             integrity="sha384-…" crossorigin="anonymous"></script>
+     (copy both from https://www.jsdelivr.com/package/npm/@supabase/supabase-js) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<div class="brand-bar">
+  <span>SANTA CLARA LAW</span>
+  <span class="dept">Fall Advocacy Competition</span>
+</div>
+
+<header class="site">
+  <div class="site-title">
+    <span class="eyebrow">Santa Clara Law · Moot Court Board</span>
+    <h1 id="case-name">Patel et al. v. United States et al.</h1>
+  </div>
+  <nav class="tabs">
+    <button type="button" id="nav-login" class="active" aria-current="page" onclick="showView('login', this)">Competitor Login</button>
+    <button type="button" id="nav-judges" onclick="showView('judges', this)">Judges Information</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ===================== LOGIN VIEW ===================== -->
+  <section id="login" class="view active">
+    <div class="login-wrap">
+      <div class="login-card">
+        <div class="top-stripe"></div>
+        <div class="inner">
+          <h2>Sign in</h2>
+          <p class="tag">For registered competitors and organizers</p>
+
+          <div class="role-toggle">
+            <button type="button" id="role-competitor" class="active" aria-pressed="true" onclick="setRole('competitor')">Competitor</button>
+            <button type="button" id="role-organizer" aria-pressed="false" onclick="setRole('organizer')">Organizer / admin</button>
+          </div>
+
+          <form id="login-form" data-action="signIn">
+            <div class="field">
+              <label for="login-email">SCU email address</label>
+              <input id="login-email" name="email" type="email" autocomplete="username" placeholder="jstudent@scu.edu" required>
+            </div>
+            <div class="field">
+              <label for="login-password">Password</label>
+              <input id="login-password" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn-primary">Sign in</button>
+            <div id="login-status" class="status-msg" role="status" aria-live="polite"></div>
+          </form>
+          <div class="login-foot">
+            Forgot your password? Contact the Moot Court Board.<br>
+            Judges do not need an account — <a href="#" onclick="showView('judges', document.getElementById('nav-judges')); return false;">visit the judges page</a>.
+          </div>
+
+          <div class="privacy-note">
+            🔒 Your account only shows your own room assignments and scores. Competitors cannot view other teams' results.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== COMPETITOR DASHBOARD ===================== -->
+  <section id="dashboard" class="view">
+    <div id="force-change-banner" class="force-banner">
+      <span>This is your first time signing in. For security, please set a new password after logging in with your temporary password.</span>
+      <a href="#" onclick="document.getElementById('settings-card').scrollIntoView({behavior:'smooth'}); return false;">Change password →</a>
+    </div>
+
+    <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div class="sub" style="margin-bottom:2px;">Welcome back,</div>
+        <h2 style="margin:0;" id="dashboard-name">Jordan Alvarez</h2>
+        <div class="sub case-caption" style="margin-top:6px;" data-case-name>Patel et al. v. United States et al.</div>
+      </div>
+      <div style="text-align:right;">
+        <a href="#" style="font-size:15px;font-weight:500;" onclick="signOut(); return false;">Log out</a>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <div class="dash-col">
+        <div id="dash-rounds-anchor" style="display:contents;"></div>
+      </div>
+
+      <div class="dash-col">
+      <div class="card dash-results">
+          <h2>My results</h2>
+          <div class="sub">Released round by round as the board publishes them</div>
+          <div id="dash-standing-body" class="standing-block"></div>
+          <div id="dash-results-body"><p class="note">Loading…</p></div>
+
+          <div class="tiebreak-note" id="tiebreak-note">
+            <strong>How scores work:</strong> each judge writes one total; your round score is the mean of the panel's totals, ranked within your room. Your cumulative score combines your team's brief score with your oral average across preliminary rounds.
+          </div>
+
+          <div class="lock-note">🔒 Visible to you only — no other competitor or team can see this panel.</div>
+      </div>
+
+      <div class="card dash-settings" id="settings-card">
+          <h2>Account settings</h2>
+          <div class="sub">Change your password at any time — no need to wait for a reset email</div>
+          <form id="settings-form" data-action="updatePassword">
+            <div class="field">
+              <label for="current-password">Current password</label>
+              <input id="current-password" type="password" autocomplete="current-password" placeholder="••••••••" required>
+            </div>
+            <div class="settings-row">
+              <div class="field">
+                <label for="new-password">New password</label>
+                <input id="new-password" type="password" autocomplete="new-password" minlength="8" placeholder="At least 8 characters" required>
+              </div>
+              <div class="field">
+                <label for="confirm-password">Confirm new password</label>
+                <input id="confirm-password" type="password" autocomplete="new-password" minlength="8" placeholder="Re-enter new password" required>
+              </div>
+            </div>
+            <button type="submit" class="btn-secondary">Update password</button>
+            <div id="settings-status" class="status-msg" role="status" aria-live="polite"></div>
+          </form>
+      </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ORGANIZER CONSOLE ===================== -->
+  <section id="organizer" class="view">
+    <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div class="sub" style="margin-bottom:2px;">Signed in as</div>
+        <h2 style="margin:0;" id="organizer-email">hmc@scu.edu</h2>
+      </div>
+      <div style="text-align:right;">
+        <span class="org-badge">Organizer · score entry authorized</span>
+        <div style="margin-top:10px;"><a href="#" style="font-size:12px;" onclick="signOut(); return false;">Log out</a></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Competition settings</h2>
+      <div class="sub">How scores combine and who advances. Saved for everyone — the competitor dashboard explains the same rules.</div>
+      <form data-action="saveSettings">
+        <div class="settings-row">
+          <div class="field">
+            <label for="set-brief-weight">Brief weight (% of combined score)</label>
+            <input id="set-brief-weight" type="number" min="0" max="100" step="1" required>
+          </div>
+          <div class="field">
+            <label for="set-qf-teams">Teams advancing to elimination rounds</label>
+            <input id="set-qf-teams" type="number" min="0" step="1" required>
+          </div>
+          <div class="field">
+            <label for="set-individual-seats">Extra individual seats</label>
+            <input id="set-individual-seats" type="number" min="0" step="1" required>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="field">
+            <label for="set-score-min">Lowest possible ballot total</label>
+            <input id="set-score-min" type="number" min="0" max="100" step="1" required>
+          </div>
+          <div class="field">
+            <label for="set-score-max">Highest possible ballot total</label>
+            <input id="set-score-max" type="number" min="1" max="100" step="1" required>
+          </div>
+        </div>
+        <button type="submit" class="btn-secondary">Save settings</button>
+        <div id="settings-org-status" class="status-msg" role="status" aria-live="polite"></div>
+      </form>
+      <p class="note" style="margin-top:12px;">Everyone on an advancing team qualifies; the extra seats go to the highest combined scores among advocates whose team did not advance. Match the ballot range to the paper ballot judges fill in, so a mistyped total is caught on entry.</p>
+    </div>
+
+    <div class="card">
+      <h2>Manage Rounds</h2>
+      <div class="sub">Add a round whenever you're ready to schedule it — you don't need all six set up at once.</div>
+      <form data-action="createRound">
+        <div class="settings-row">
+          <div class="field">
+            <label for="new-round-name">Round name</label>
+            <input id="new-round-name" type="text" placeholder="e.g. Prelim 1" required>
+          </div>
+          <div class="field">
+            <label for="new-round-date">Date</label>
+            <input id="new-round-date" type="date">
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="field">
+            <label for="new-round-case">Case</label>
+            <input id="new-round-case" type="text" placeholder="Shown to competitors on their round card">
+          </div>
+          <div class="field">
+            <label for="new-round-prep">Prep room (optional)</label>
+            <input id="new-round-prep" type="text" placeholder="e.g. Charney 210">
+          </div>
+        </div>
+        <label class="check-field"><input type="checkbox" id="new-round-prelim" checked> Preliminary round — counts toward cumulative standings. Untick for the quarterfinal, semifinal and final.</label>
+        <button type="submit" class="btn-primary" style="width:auto;">Add round</button>
+        <div id="round-status-msg" class="status-msg" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Manage Teams</h2>
+      <div class="sub">Create a team and assign its two competitors. Seeds and brief scores can be added later once they're in.</div>
+
+      <form data-action="createTeam">
+        <div class="field">
+          <label for="new-team-name">Team name</label>
+          <input id="new-team-name" type="text" placeholder="e.g. Subpoena Colada" required>
+        </div>
+        <div class="settings-row">
+          <div class="field">
+            <label for="new-team-comp1">Competitor 1</label>
+            <select id="new-team-comp1" required></select>
+          </div>
+          <div class="field">
+            <label for="new-team-comp2">Competitor 2</label>
+            <select id="new-team-comp2" required></select>
+          </div>
+        </div>
+        <button type="submit" class="btn-primary" style="width:auto;">Create team</button>
+        <div id="team-status-msg" class="status-msg" role="status" aria-live="polite"></div>
+      </form>
+
+      <form data-action="setTeamSeed" style="border-top:1px solid var(--border);margin-top:20px;padding-top:18px;">
+        <div class="field">
+          <label for="seed-team-select">Set / update seed &amp; brief score</label>
+          <select id="seed-team-select" required></select>
+        </div>
+        <div class="settings-row">
+          <div class="field">
+            <label for="seed-value">Seed number (1–12)</label>
+            <input id="seed-value" type="number" min="1" max="12" step="1" placeholder="e.g. 1">
+          </div>
+          <div class="field">
+            <label for="seed-brief-score">Brief score (optional)</label>
+            <input id="seed-brief-score" type="number" step="0.01" placeholder="optional">
+          </div>
+        </div>
+        <button type="submit" class="btn-secondary">Save seed</button>
+        <div id="seed-status-msg" class="status-msg" role="status" aria-live="polite"></div>
+      </form>
+
+      <div style="border-top:1px solid var(--border);margin-top:20px;padding-top:18px;">
+        <h3 class="roster-heading">Teams</h3>
+        <div class="table-scroll">
+          <table class="org-table">
+            <thead><tr><th>Team</th><th>Seed</th><th>Brief</th><th>Sides</th><th>Members</th><th></th></tr></thead>
+            <tbody id="team-roster-body"></tbody>
+          </table>
+        </div>
+        <div id="unassigned-competitors" class="status-msg"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Assign Matchup</h2>
+      <div class="sub">Pick the round, room, and call time, then the two teams facing each other. Both members of each team are added automatically, on their team's side.</div>
+
+      <form data-action="saveMatchup">
+        <div class="field">
+          <label for="matchup-round">Round</label>
+          <select id="matchup-round" required></select>
+        </div>
+        <div class="settings-row">
+          <div class="field">
+            <label for="matchup-room">Room</label>
+            <input id="matchup-room" type="text" placeholder="e.g. Charney 106" required>
+          </div>
+          <div class="field">
+            <label for="matchup-call-time">Call time</label>
+            <input id="matchup-call-time" type="text" placeholder="e.g. 5:45 PM">
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="field">
+            <label for="matchup-team-pet">Petitioner team</label>
+            <select id="matchup-team-pet" required></select>
+          </div>
+          <div class="field">
+            <label for="matchup-team-resp">Respondent team</label>
+            <select id="matchup-team-resp" required></select>
+          </div>
+        </div>
+        <button type="submit" class="btn-primary" style="width:auto;">Save matchup</button>
+        <div id="matchup-status-msg" class="status-msg" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Enter Score Reports</h2>
+      <div class="sub">Choose a round to load its rooms and competitors.</div>
+      <div class="field" style="max-width:320px;">
+        <label for="scoring-round">Round</label>
+        <select id="scoring-round" onchange="loadScoringRound()"></select>
+      </div>
+      <div class="tiebreak-note">
+        Enter the total each judge wrote on their ballot, plus any feedback to pass on. Scores save per competitor when you click Save for their row. Competitors see nothing for a round until you publish it; the live standings below update as you go.
+      </div>
+    </div>
+
+    <div id="scoring-cards"></div>
+
+    <div class="card">
+      <h2>Live standings</h2>
+      <div class="sub">Cumulative across preliminary rounds — organizers only</div>
+      <div id="standings-body"></div>
+    </div>
+
+    <div id="publish-rounds-container"></div>
+
+    <div class="card">
+      <h2>Access note</h2>
+      <p style="font-size:13px;color:var(--stone);margin:0;">
+        Only accounts flagged with the organizer role — currently <strong>hmc@scu.edu</strong> — can view this console or write to the ballots table. Competitor accounts never see this page, even if they guess the URL, because the backend checks the signed-in user's role on every request, not just the frontend navigation.
+      </p>
+    </div>
+  </section>
+
+  <!-- ===================== JUDGES VIEW ===================== -->
+  <section id="judges" class="view">
+    <div class="judge-hero">
+      <div class="eyebrow">Volunteer with Santa Clara Law</div>
+      <h2>Judge the Moot Court Competition</h2>
+      <p>
+        We're looking for attorneys, alumni, and faculty to serve as judges for oral arguments.
+        No prior moot court experience is required — we provide the bench memo and scoring rubric in advance.
+      </p>
+      <a class="btn-cta" href="https://forms.gle/XcvrCCwT5PtUCvnEA" target="_blank" rel="noopener">
+        Express interest →
+      </a>
+    </div>
+
+    <details class="accordion">
+      <summary>Parking Information</summary>
+      <div class="accordion-body">
+        Santa Clara Law has two adjacent parking structures, each one block from Charney Hall. During the
+        weekdays, parking is paid, but please email <a href="mailto:hmc@scu.edu">hmc@scu.edu</a> to reserve a
+        parking day-pass. Parking is free on weekends. Charney Hall is fully ADA-accessible.
+      </div>
+    </details>
+
+    <details class="accordion">
+      <summary>Competitor Rules and Guidelines</summary>
+      <div class="accordion-body">
+        Full competition rules and guidelines will be posted here. Contact the Moot Court Board at
+        <a href="mailto:hmc@scu.edu">hmc@scu.edu</a> with any questions in the meantime.
+      </div>
+    </details>
+
+    <div class="card">
+      <h2>Who's eligible?</h2>
+      <p style="font-size:13px;color:#333;margin:0;">
+        Post-grad JDs, practicing lawyers, post-bar attorneys, and legal academia — we're interested in having a
+        variety of perspectives for our competitions.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>What is the competition format?</h2>
+      <p style="font-size:13px;color:#333;margin:0;">
+        Each round, Petitioner and Respondent teams of two will present arguments around two issues, with each
+        speaker arguing for 15 minutes. Petitioner may reserve up to five minutes of its time for rebuttal. The judges
+        then confer, complete a ballot for each advocate, and call the advocates back for general or specific feedback.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>What are event schedules like?</h2>
+      <p style="font-size:13px;color:#333;margin:0;">
+        We ask that judges arrive 15 minutes prior to the start of the round to ensure no delays. Rounds will
+        typically last 75–90 minutes, with an allotted break time. Two rounds will occur each competition date —
+        please let us know how many rounds you'd be interested in judging.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Is a bench brief provided beforehand?</h2>
+      <p style="font-size:13px;color:#333;margin:0;">
+        Yes! The HMC Board will send you a copy of the bench brief, along with a few opportunities to consult the
+        HMC Board with any questions.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>How should I score?</h2>
+      <p style="font-size:13px;color:#333;margin:0;">
+        Score the advocacy, not which side you think should win: knowledge of the record and the law, responsiveness to
+        questions, organization and use of time, and courtroom demeanor. Please use the full range of the rubric and write
+        one total per advocate. Anything you write in the comments box is passed on to that advocate once the round is released.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>What if I know a competitor?</h2>
+      <p style="font-size:13px;color:#333;margin:0;">
+        Tell us before the round if you know a competitor personally or have taught, supervised or worked with them, and
+        we will move you to another room. Email <a href="mailto:hmc@scu.edu">hmc@scu.edu</a>.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>If something comes up, how should I cancel?</h2>
+      <p style="font-size:13px;color:#333;margin:0;">
+        Please email <a href="mailto:hmc@scu.edu">hmc@scu.edu</a> with any cancellations as soon as you know of
+        your conflict.
+      </p>
+    </div>
+
+    <div class="card" style="text-align:center;">
+      <h2 style="margin-bottom:8px;">Ready to sign up?</h2>
+      <p style="color:var(--stone);font-size:13px;margin-bottom:18px;">Takes about two minutes.</p>
+      <a class="btn-cta" href="https://forms.gle/XcvrCCwT5PtUCvnEA" target="_blank" rel="noopener">
+        Express interest →
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site">
+  Santa Clara University School of Law · Moot Court Board · Questions? Contact hmc@scu.edu
+</footer>
+
+<script>
+// ---- Connect to your Supabase project ----
+// The publishable key is safe to ship in the page; access control lives in your
+// Row Level Security policies, so make sure every table has them.
+const SUPABASE_URL = 'https://bfurbnjvilmgtfhfobzw.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_fUXqENSPZZIphTFRTY6IiQ_fY-qWHUi';
+
+// The case name in the page header is the single source of truth.
+// Every other place it appears (dashboard caption, score cards, new-round default)
+// is filled from here, so it only ever needs changing in one spot.
+const CASE_NAME = document.getElementById('case-name').textContent.trim();
+
+// Competition rules the board can change from the organizer console (stored in the
+// competition_settings table). These are the fallbacks until that table exists.
+const DEFAULT_SETTINGS = {
+  brief_weight: 0.5,      // share of the combined score that comes from the brief (UCLA: 50/50)
+  qf_teams: 8,            // teams advancing to the elimination rounds — every member qualifies
+  individual_seats: 4,    // extra seats for the best advocates from teams that did not advance
+  score_min: 46,          // lowest / highest total a judge can write on the ballot
+  score_max: 100
+};
+let settings = { ...DEFAULT_SETTINGS };
+
+// Created lazily (only when actually needed) so a failed/blocked CDN load
+// can't break basic page navigation like tabs and the role toggle.
+let _supabase = null;
+function getSupabase(){
+  if (_supabase) return _supabase;
+  if (!window.supabase) {
+    throw new Error('Could not load the Supabase library. Check your internet connection, or that cdn.jsdelivr.net is not blocked by a firewall/ad blocker, then reload the page.');
+  }
+  _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  // If the session expires or is revoked elsewhere, drop back to the login screen.
+  _supabase.auth.onAuthStateChange(event => { if (event === 'SIGNED_OUT') resetToLogin(); });
+  return _supabase;
+}
+
+let selectedRole = 'competitor';
+
+// ================= small helpers ==================
+const $ = id => document.getElementById(id);
+
+// Everything that comes from the database or a form is inserted through esc()
+// so a team called "<img onerror=…>" is displayed literally instead of executed.
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+const note = text => `<p class="note">${esc(text)}</p>`;
+const infoRow = (label, value, cls = '') =>
+  `<div class="assignment-row"><div><div class="label">${esc(label)}</div><div class="value ${cls}">${esc(value)}</div></div></div>`;
+const fmt1 = x => (x === null || x === undefined || x === '') ? '—' : Number(x).toFixed(1);
+const pct = w => Math.round(Number(w) * 100);
+const ordinal = n => { n = Number(n); const s = ['th', 'st', 'nd', 'rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
+const avg = xs => xs.length ? xs.reduce((a, c) => a + c, 0) / xs.length : null;
+
+// Inline status text next to the thing that produced it. Errors stay until the next
+// action; success messages fade on their own. Falls back to a toast when there is
+// no status element nearby.
+function setStatus(target, msg, isError = false){
+  const el = typeof target === 'string' ? $(target) : target;
+  if (!el) { if (msg) toast(msg, isError); return; }
+  clearTimeout(el._timer);
+  el.textContent = msg || '';
+  el.classList.toggle('error', !!isError);
+  el.classList.toggle('ok', !!msg && !isError);
+  if (msg && !isError) el._timer = setTimeout(() => { el.textContent = ''; el.classList.remove('ok'); }, 3000);
+}
+
+function toast(msg, isError = false){
+  let el = $('toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'toast';
+    el.className = 'toast';
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-live', 'polite');
+    document.body.appendChild(el);
+  }
+  clearTimeout(el._timer);
+  el.textContent = msg;
+  el.classList.toggle('error', !!isError);
+  el.classList.add('show');
+  el._timer = setTimeout(() => el.classList.remove('show'), isError ? 6000 : 3500);
+}
+
+// Disables a button while its async action runs so a double-click can't
+// create two rounds, two teams, or two matchups.
+async function withBusy(btn, fn){
+  if (!btn) return fn();
+  if (btn.disabled) return;
+  btn.disabled = true;
+  btn.setAttribute('aria-busy', 'true');
+  try { return await fn(); }
+  finally { btn.disabled = false; btn.removeAttribute('aria-busy'); }
+}
+
+function formatRoundDate(dateStr){
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+const roundTitle = r => r.round_name + (r.round_date ? ' — ' + formatRoundDate(r.round_date) : '');
+const isPrelim = r => r.is_preliminary !== false;   // rounds created before the migration count as prelims
+
+// ================= scoring rules ==================
+// Mirrors the SQL in supabase-migration.sql exactly. If one changes, change the other.
+const scoring = {
+  // One ballot → its entered judge totals (highest first), mean and median.
+  summarize(b){
+    const s = [b.judge_1_score, b.judge_2_score, b.judge_3_score]
+      .filter(v => v !== null && v !== undefined && v !== '')
+      .map(Number).sort((x, y) => y - x);
+    if (!s.length) return null;
+    const mean = avg(s);
+    const median = s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2;
+    return { scores: s, mean, median, n: s.length };
+  },
+  // Within a room: higher mean, then higher median, then the highest single score, then the next…
+  compareRound(a, b){
+    if (b.mean !== a.mean) return b.mean - a.mean;
+    if (b.median !== a.median) return b.median - a.median;
+    for (let i = 0; i < Math.max(a.scores.length, b.scores.length); i++) {
+      const x = a.scores[i] ?? -Infinity, y = b.scores[i] ?? -Infinity;
+      if (y !== x) return y - x;
+    }
+    return 0;
+  },
+  // Cumulative: higher combined score, then higher oral average, then higher brief score.
+  compareCumulative(a, b){
+    if (b.combined !== a.combined) return b.combined - a.combined;
+    if (b.oral !== a.oral) return b.oral - a.oral;
+    return (b.brief ?? -Infinity) - (a.brief ?? -Infinity);
+  },
+  // Competition ranking (1, 1, 3): equal items share a rank. Sorts `items` in place.
+  rank(items, cmp){
+    items.sort(cmp);
+    items.forEach((it, i) => { it.place = (i > 0 && cmp(items[i - 1], it) === 0) ? items[i - 1].place : i + 1; });
+    return items;
+  },
+  // Combined score: brief_weight × team brief + (1 − brief_weight) × oral average.
+  // A team with no brief score yet is scored on oral alone.
+  combine(brief, oral, w){
+    return (brief === null || brief === undefined) ? oral : w * Number(brief) + (1 - w) * oral;
+  },
+  // Cumulative standings across preliminary rounds (published only, unless includeUnpublished).
+  standings({ rounds, ballots, teams, profiles, settings: cfg, includeUnpublished = false }){
+    const prelims = rounds.filter(isPrelim);
+    const counted = prelims.filter(r => includeUnpublished || r.published);
+    const countedIds = new Set(counted.map(r => r.id));
+    const w = Number(cfg.brief_weight);
+
+    const roundMeans = {};   // competitor → [mean per counted round]
+    ballots.forEach(b => {
+      if (!countedIds.has(b.round_id)) return;
+      const s = scoring.summarize(b);
+      if (s) (roundMeans[b.competitor_id] = roundMeans[b.competitor_id] || []).push(s.mean);
+    });
+
+    const teamsById = {};
+    teams.forEach(t => teamsById[t.id] = t);
+
+    const advocates = profiles
+      .filter(p => p.role === 'competitor' && roundMeans[p.id])
+      .map(p => {
+        const team = teamsById[p.team_id] || null;
+        const oral = avg(roundMeans[p.id]);
+        const brief = team && team.brief_score !== null && team.brief_score !== undefined ? Number(team.brief_score) : null;
+        return { id: p.id, email: p.email, team_id: p.team_id, team_name: team ? team.team_name : null,
+                 brief, oral, combined: scoring.combine(brief, oral, w), rounds: roundMeans[p.id].length };
+      });
+
+    const teamRows = teams.map(t => {
+      const members = advocates.filter(a => a.team_id === t.id);
+      if (!members.length) return null;
+      const oral = avg(members.map(m => m.oral));
+      const brief = t.brief_score !== null && t.brief_score !== undefined ? Number(t.brief_score) : null;
+      return { team_id: t.id, team_name: t.team_name, seed: t.seed, brief, oral,
+               combined: scoring.combine(brief, oral, w), members };
+    }).filter(Boolean);
+
+    scoring.rank(teamRows, scoring.compareCumulative);
+    const teamPlace = {};
+    teamRows.forEach(t => { teamPlace[t.team_id] = t.place; t.qualifies = t.place <= Number(cfg.qf_teams); });
+
+    scoring.rank(advocates, scoring.compareCumulative);
+    advocates.forEach(a => {
+      a.team_place = teamPlace[a.team_id] ?? null;
+      a.qualifies_with_team = a.team_place !== null && a.team_place <= Number(cfg.qf_teams);
+      a.individual_seat = false;
+    });
+    advocates.filter(a => !a.qualifies_with_team)
+      .slice(0, Number(cfg.individual_seats))
+      .forEach(a => { a.individual_seat = true; });
+
+    return {
+      prelims_total: prelims.length,
+      prelims_published: prelims.filter(r => r.published).length,
+      all_published: prelims.length > 0 && prelims.every(r => r.published),
+      advocates, teams: teamRows
+    };
+  }
+};
+window.scoring = scoring;
+
+// ================= navigation ==================
+function showView(id, btn){
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  $(id).classList.add('active');
+  document.querySelectorAll('nav.tabs button').forEach(b => {
+    b.classList.remove('active');
+    b.removeAttribute('aria-current');
+  });
+  if (btn) { btn.classList.add('active'); btn.setAttribute('aria-current', 'page'); }
+}
+
+function setRole(role){
+  selectedRole = role;
+  ['competitor', 'organizer'].forEach(r => {
+    const b = $('role-' + r);
+    b.classList.toggle('active', r === role);
+    b.setAttribute('aria-pressed', String(r === role));
+  });
+}
+
+// Clear anything user-specific so the next person on this browser never sees it.
+function resetToLogin(){
+  $('dash-rounds-anchor').innerHTML = '';
+  $('dash-results-body').innerHTML = '';
+  $('dash-standing-body').innerHTML = '';
+  $('dashboard-name').textContent = '';
+  $('organizer-email').textContent = '';
+  $('scoring-cards').innerHTML = '';
+  $('publish-rounds-container').innerHTML = '';
+  $('standings-body').innerHTML = '';
+  $('force-change-banner').style.display = 'none';
+  ['login-password', 'current-password', 'new-password', 'confirm-password'].forEach(id => { $(id).value = ''; });
+  showView('login', $('nav-login'));
+}
+
+// ================= auth ==================
+// Shared by fresh sign-ins and restored sessions: look up the profile and route.
+async function enterApp(user, { restoring = false } = {}){
+  const supabase = getSupabase();
+
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('role, email, must_change_password')
+    .eq('id', user.id)
+    .single();
+
+  if (profileError || !profile) {
+    await supabase.auth.signOut();
+    if (!restoring) setStatus('login-status', 'Signed in, but no profile record was found for this account. Contact hmc@scu.edu.', true);
+    return false;
+  }
+
+  if (!restoring && selectedRole === 'organizer' && profile.role !== 'organizer') {
+    await supabase.auth.signOut();
+    setStatus('login-status', 'This account does not have organizer access. Switch to Competitor to sign in.', true);
+    return false;
+  }
+
+  const settingsLoaded = await loadSettings();
+
+  if (profile.role === 'organizer') {
+    $('organizer-email').textContent = profile.email;
+    showView('organizer', null);
+    if (!settingsLoaded) toast('Competition settings table not found — using defaults. Run supabase-migration.sql to enable saved settings.', true);
+    loadOrganizerData();
+  } else {
+    $('dashboard-name').textContent = profile.email;
+    $('force-change-banner').style.display = profile.must_change_password ? 'flex' : 'none';
+    showView('dashboard', null);
+    loadDashboardData(user.id);
+  }
+  return true;
+}
+
+async function loadSettings(){
+  const supabase = getSupabase();
+  const { data, error } = await supabase.from('competition_settings').select('*').eq('id', 1).limit(1);
+  if (error || !data || !data.length) { settings = { ...DEFAULT_SETTINGS }; return false; }
+  settings = { ...DEFAULT_SETTINGS };
+  Object.keys(DEFAULT_SETTINGS).forEach(k => { if (data[0][k] !== null && data[0][k] !== undefined) settings[k] = Number(data[0][k]); });
+  return true;
+}
+
+async function signIn(){
+  const email = $('login-email').value.trim().toLowerCase();
+  const password = $('login-password').value;
+
+  if (!email || !password) {
+    setStatus('login-status', 'Enter both an email address and a password.', true);
+    return;
+  }
+
+  let supabase;
+  try { supabase = getSupabase(); } catch (e) { setStatus('login-status', e.message, true); return; }
+
+  setStatus('login-status', '');
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) {
+    setStatus('login-status', 'Sign in failed: ' + error.message, true);
+    return;
+  }
+
+  const ok = await enterApp(data.user);
+  if (ok) $('login-password').value = '';
+}
+
+// Restore a still-valid session on reload instead of bouncing to the login form.
+async function restoreSession(){
+  let supabase;
+  try { supabase = getSupabase(); } catch (e) { return; } // CDN blocked: signIn() will explain when they try
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session && session.user) await enterApp(session.user, { restoring: true });
+}
+
+async function signOut(){
+  try { await getSupabase().auth.signOut(); }
+  catch (e) { /* even if Supabase never loaded, still get back to the login screen */ }
+  resetToLogin();
+}
+
+async function updatePassword(){
+  const currentPassword = $('current-password').value;
+  const newPassword = $('new-password').value;
+  const confirmPassword = $('confirm-password').value;
+
+  if (!currentPassword) { setStatus('settings-status', 'Enter your current password.', true); return; }
+  if (!newPassword || newPassword.length < 8) { setStatus('settings-status', 'New password must be at least 8 characters.', true); return; }
+  if (newPassword !== confirmPassword) { setStatus('settings-status', 'New password and confirmation do not match.', true); return; }
+
+  let supabase;
+  try { supabase = getSupabase(); } catch (e) { setStatus('settings-status', e.message, true); return; }
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) { setStatus('settings-status', 'You are not signed in.', true); return; }
+
+  // Actually check the current password before changing anything.
+  const { error: verifyError } = await supabase.auth.signInWithPassword({ email: user.email, password: currentPassword });
+  if (verifyError) { setStatus('settings-status', 'Current password is incorrect.', true); return; }
+
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) { setStatus('settings-status', 'Could not update password: ' + error.message, true); return; }
+
+  const { error: flagError } = await supabase.from('profiles').update({ must_change_password: false }).eq('id', user.id);
+  if (flagError) console.warn('Password changed, but could not clear must_change_password:', flagError.message);
+
+  $('force-change-banner').style.display = 'none';
+  ['current-password', 'new-password', 'confirm-password'].forEach(id => { $(id).value = ''; });
+  setStatus('settings-status', 'Password updated.');
+}
+
+// ================= COMPETITOR DASHBOARD ==================
+async function loadDashboardData(userId){
+  let supabase;
+  try { supabase = getSupabase(); } catch (e) { toast(e.message, true); return; }
+
+  const anchor = $('dash-rounds-anchor');
+  const resultsBody = $('dash-results-body');
+  const standingBody = $('dash-standing-body');
+  anchor.innerHTML = `<div class="card dash-round">${note('Loading your rounds…')}</div>`;
+  resultsBody.innerHTML = note('Loading…');
+  standingBody.innerHTML = '';
+  $('tiebreak-note').innerHTML = tieBreakText();
+
+  const { data: rounds, error: roundsError } = await supabase
+    .from('rounds')
+    .select('id, round_name, case_name, round_date, prep_room, published, is_preliminary')
+    .order('round_date');
+
+  if (roundsError) {
+    anchor.innerHTML = `<div class="card dash-round">${note('Could not load rounds. Refresh the page to try again.')}</div>`;
+    resultsBody.innerHTML = note('Could not load results.');
+    return;
+  }
+
+  if (!rounds || !rounds.length) {
+    anchor.innerHTML = `<div class="card dash-round"><h2>Rounds</h2>${note('No rounds have been scheduled yet. Check back once the board releases the schedule.')}</div>`;
+    resultsBody.innerHTML = note('No rounds scheduled yet.');
+    return;
+  }
+
+  const { data: assignments, error: assignError } = await supabase
+    .from('assignments')
+    .select('round_id, room, call_time, side')
+    .eq('competitor_id', userId);
+
+  const assignByRound = {};
+  (assignments || []).forEach(a => assignByRound[a.round_id] = a);
+
+  anchor.innerHTML = '';
+  rounds.forEach(round => {
+    const card = document.createElement('div');
+    card.className = 'card dash-round';
+    const a = assignByRound[round.id];
+    const prepRow = round.prep_room ? infoRow('Prep room', round.prep_room) : '';
+    let body;
+    if (assignError) {
+      body = note('Could not load your room assignment. Refresh the page to try again.') + prepRow;
+    } else if (!a) {
+      body = note('Not yet scheduled — your room and side will appear here once the board assigns them.') + prepRow;
+    } else {
+      body =
+        infoRow('Case', round.case_name || CASE_NAME, 'case-caption') +
+        infoRow('Room', a.room || 'TBD') +
+        infoRow('Call time', a.call_time || 'TBD') +
+        infoRow('Side', a.side || 'TBD') +
+        prepRow;
+    }
+    card.innerHTML = `
+      <h2>${esc(roundTitle(round))}</h2>
+      <div class="sub">${isPrelim(round) ? 'Preliminary round' : 'Elimination round'} · updates automatically as rounds are released</div>
+      ${body}`;
+    anchor.appendChild(card);
+  });
+
+  // Cumulative standing — the server only answers once every preliminary round is published.
+  renderStanding(supabase);
+
+  // Per-round results — the server only returns scores for published rounds.
+  const published = rounds.filter(r => r.published);
+  const results = await Promise.all(published.map(r => supabase.rpc('get_my_results', { p_round_id: r.id })));
+  const resultByRound = {};
+  published.forEach((r, i) => { resultByRound[r.id] = results[i]; });
+
+  resultsBody.innerHTML = '';
+  rounds.forEach(r => {
+    const block = document.createElement('div');
+    block.className = 'result-block';
+    const a = assignByRound[r.id];
+
+    if (!r.published) {
+      if (!a) {
+        block.innerHTML = `<div class="sub result-head">${esc(r.round_name)}</div>` + note('Not yet scheduled.');
+      } else {
+        block.innerHTML = `<div class="sub result-head">${esc(r.round_name)}<span class="badge pending">Pending</span></div>`
+          + note('Results are released after the board publishes this round.');
+      }
+      resultsBody.appendChild(block);
+      return;
+    }
+
+    const { data: result, error: rpcError } = resultByRound[r.id];
+    const row = (!rpcError && result && result[0]) ? result[0] : null;
+    const head = `<div class="sub result-head">${esc(r.round_name)}<span class="badge published">Final</span></div>`;
+
+    if (row && row.mean_score !== null && row.mean_score !== undefined) {
+      const where = row.room ? ` in ${row.room}` : '';
+      block.innerHTML = head + `
+        <div class="stat-pair">
+          <div class="stat"><div class="num">${esc(fmt1(row.mean_score))}</div><div class="lbl">Mean score</div></div>
+          <div class="stat"><div class="num">${esc(ordinal(row.room_rank))} of ${esc(row.room_size)}</div><div class="lbl">In your room</div></div>
+        </div>
+        <div class="note">Ranked among the ${esc(row.room_size)} advocates${esc(where)}. Rooms have different panels, so places are only compared across rooms in the cumulative standings.</div>
+        ${row.feedback ? `<div class="feedback-quote"><span class="label">Judges' feedback</span>${esc(row.feedback)}</div>` : ''}`;
+    } else {
+      block.innerHTML = head + note(rpcError ? 'Could not load results for this round.' : 'No scores were recorded for you in this round.');
+    }
+    resultsBody.appendChild(block);
+  });
+}
+
+function tieBreakText(){
+  return `<strong>How scores work:</strong> each judge writes one total (${esc(settings.score_min)}–${esc(settings.score_max)}); your round score is the mean of the panel's three totals, ranked within your room. `
+    + `Your cumulative score is ${esc(pct(settings.brief_weight))}% team brief score and ${esc(100 - pct(settings.brief_weight))}% oral average across preliminary rounds. `
+    + `Ties within a room are broken by the higher median score, then the highest single score, then the next-highest; cumulative ties by the higher oral average, then the higher brief score.`;
+}
+
+async function renderStanding(supabase){
+  const body = $('dash-standing-body');
+  const { data, error } = await supabase.rpc('get_my_standing');
+  if (error) { body.innerHTML = ''; return; }   // function not installed yet: just hide the block
+  const s = data && data[0];
+  if (!s) { body.innerHTML = ''; return; }
+
+  const heading = '<h3 class="roster-heading">Cumulative standing</h3>';
+  if (!s.all_published) {
+    body.innerHTML = heading + note(`Released once every preliminary round is published (${s.prelims_published} of ${s.prelims_total} so far).`);
+    return;
+  }
+  if (s.combined === null || s.combined === undefined) {
+    body.innerHTML = heading + note('No preliminary scores were recorded for you, so there is no cumulative standing to show.');
+    return;
+  }
+  const lines = [];
+  if (s.qualifies_with_team) lines.push('Your team advances to the elimination rounds.');
+  else if (s.individual_seat) lines.push('You have earned an individual seat on the strength of your own scores.');
+  body.innerHTML = heading + `
+    <div class="stat-pair standing-stats">
+      <div class="stat"><div class="num">${esc(fmt1(s.combined))}</div><div class="lbl">Combined score</div></div>
+      <div class="stat"><div class="num">${esc(s.place)} of ${esc(s.total_advocates)}</div><div class="lbl">Among advocates</div></div>
+      <div class="stat"><div class="num">${esc(s.team_place)} of ${esc(s.total_teams)}</div><div class="lbl">Team</div></div>
+    </div>
+    <div class="note">Brief ${esc(fmt1(s.brief_score))} · oral average ${esc(fmt1(s.oral_mean))} across ${esc(s.prelims_total)} preliminary round${s.prelims_total === 1 ? '' : 's'}.</div>
+    ${lines.map(l => `<div class="advance-line">${esc(l)}</div>`).join('')}`;
+}
+
+// ================= ORGANIZER CONSOLE ==================
+// Latest copy of the organizer's data, so validations, the roster and live standings
+// don't need extra queries.
+const org = { rounds: [], teams: [], competitors: [], assignments: [], ballots: [] };
+
+// Replaces a select's options while keeping whatever the organizer had selected.
+function fillSelect(id, optionsHtml, emptyLabel){
+  const sel = $(id);
+  const prev = sel.value;
+  sel.innerHTML = optionsHtml || `<option value="">${esc(emptyLabel)}</option>`;
+  if (prev && [...sel.options].some(o => o.value === prev)) sel.value = prev;
+}
+
+async function loadOrganizerData(){
+  let supabase;
+  try { supabase = getSupabase(); } catch (e) { toast(e.message, true); return; }
+
+  const [roundsRes, teamsRes, compsRes, assignRes, ballotRes] = await Promise.all([
+    supabase.from('rounds').select('id, round_name, round_date, published, is_preliminary').order('round_date'),
+    supabase.from('teams').select('id, team_name, seed, brief_score').order('seed', { nullsFirst: false }).order('team_name'),
+    supabase.from('profiles').select('id, email, team_id, role').eq('role', 'competitor').order('email'),
+    supabase.from('assignments').select('round_id, competitor_id, room, call_time, side'),
+    supabase.from('ballots').select('round_id, competitor_id, judge_1_score, judge_2_score, judge_3_score, feedback'),
+  ]);
+
+  if (roundsRes.error) { toast('Could not load rounds: ' + roundsRes.error.message, true); return; }
+  if (teamsRes.error) toast('Could not load teams: ' + teamsRes.error.message, true);
+  if (compsRes.error) toast('Could not load competitors: ' + compsRes.error.message, true);
+  if (assignRes.error) toast('Could not load assignments: ' + assignRes.error.message, true);
+  if (ballotRes.error) toast('Could not load ballots: ' + ballotRes.error.message, true);
+
+  org.rounds = roundsRes.data || [];
+  org.teams = teamsRes.data || [];
+  org.competitors = compsRes.data || [];
+  org.assignments = assignRes.data || [];
+  org.ballots = ballotRes.data || [];
+
+  const roundOptions = org.rounds
+    .map(r => `<option value="${esc(r.id)}">${esc(roundTitle(r))}</option>`)
+    .join('');
+  fillSelect('matchup-round', roundOptions, 'No rounds yet — add one above');
+  fillSelect('scoring-round', roundOptions, 'No rounds yet');
+
+  const teamsById = {};
+  org.teams.forEach(t => teamsById[t.id] = t);
+  const teamLabel = t => `${t.seed ? 'Seed ' + t.seed : 'Unseeded'} — ${t.team_name}`;
+  const teamOptions = org.teams.map(t => `<option value="${esc(t.id)}">${esc(teamLabel(t))}</option>`).join('');
+  fillSelect('matchup-team-pet', teamOptions, 'No teams yet');
+  fillSelect('matchup-team-resp', teamOptions, 'No teams yet');
+  fillSelect('seed-team-select', teamOptions, 'No teams yet');
+
+  const competitorLabel = c => c.email + (c.team_id && teamsById[c.team_id] ? ' (Team: ' + teamsById[c.team_id].team_name + ')' : '');
+  const competitorOptions = org.competitors.map(c => `<option value="${esc(c.id)}">${esc(competitorLabel(c))}</option>`).join('');
+  fillSelect('new-team-comp1', competitorOptions, 'No competitor accounts yet');
+  fillSelect('new-team-comp2', competitorOptions, 'No competitor accounts yet');
+
+  renderSettingsForm();
+  renderRoster(teamsById);
+  renderPublishCards();
+  renderStandings();
+
+  if (org.rounds.length) loadScoringRound();
+  else $('scoring-cards').innerHTML = '';
+}
+
+// Rounds each team has argued on each side, excluding `skipRoundId` (used when re-saving a matchup).
+function sideCounts(skipRoundId){
+  const teamOf = {};
+  org.competitors.forEach(c => { if (c.team_id) teamOf[c.id] = c.team_id; });
+  const seen = {};   // team → Set of "round:side"
+  org.assignments.forEach(a => {
+    const team = teamOf[a.competitor_id];
+    if (!team || a.round_id === skipRoundId || !a.side) return;
+    (seen[team] = seen[team] || new Set()).add(a.round_id + ':' + a.side);
+  });
+  const counts = {};
+  Object.keys(seen).forEach(team => {
+    counts[team] = { Petitioner: 0, Respondent: 0 };
+    seen[team].forEach(k => { const side = k.split(':')[1]; if (counts[team][side] !== undefined) counts[team][side]++; });
+  });
+  return counts;
+}
+
+// Read-only view of every team so mistakes are visible before they reach a matchup.
+function renderRoster(teamsById){
+  const membersByTeam = {};
+  org.competitors.forEach(c => {
+    if (c.team_id) (membersByTeam[c.team_id] = membersByTeam[c.team_id] || []).push(c.email);
+  });
+  const sides = sideCounts(null);
+
+  const tbody = $('team-roster-body');
+  tbody.innerHTML = '';
+  if (!org.teams.length) {
+    tbody.innerHTML = `<tr><td colspan="6" class="muted">No teams yet — create one above.</td></tr>`;
+  } else {
+    org.teams.forEach(t => {
+      const members = membersByTeam[t.id] || [];
+      const sizeFlag = members.length !== 2 ? ` <span class="badge pending">${members.length} of 2</span>` : '';
+      const sc = sides[t.id] || { Petitioner: 0, Respondent: 0 };
+      const unbalanced = Math.abs(sc.Petitioner - sc.Respondent) > 1;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><span class="team-name">${esc(t.team_name)}</span>${sizeFlag}</td>
+        <td>${esc(t.seed ?? '—')}</td>
+        <td>${esc(t.brief_score ?? '—')}</td>
+        <td class="${unbalanced ? 'side-warn' : ''}" title="Rounds argued as Petitioner / Respondent">P ${sc.Petitioner} · R ${sc.Respondent}</td>
+        <td>${members.length ? members.map(esc).join('<br>') : '<span class="muted">No members yet</span>'}</td>
+        <td><button type="button" class="btn-secondary" style="padding:5px 10px;">Remove</button></td>`;
+      tr.querySelector('button').addEventListener('click', e => withBusy(e.currentTarget, () => deleteTeam(t.id, t.team_name)));
+      tbody.appendChild(tr);
+    });
+  }
+
+  const unassigned = org.competitors.filter(c => !c.team_id || !teamsById[c.team_id]);
+  $('unassigned-competitors').textContent = unassigned.length
+    ? 'Not on a team yet: ' + unassigned.map(c => c.email).join(', ')
+    : (org.competitors.length ? 'Every competitor is on a team.' : '');
+}
+
+function renderPublishCards(){
+  const container = $('publish-rounds-container');
+  container.innerHTML = '';
+  if (!org.rounds.length) {
+    container.innerHTML = `<div class="card">${note('No rounds yet — add one above.')}</div>`;
+    return;
+  }
+  org.rounds.forEach(r => {
+    const card = document.createElement('div');
+    card.className = 'card publish-card';
+    card.innerHTML = `
+      <div>
+        <h2 style="margin-bottom:4px;">${esc(r.round_name)}</h2>
+        <div class="sub" style="margin-bottom:0;">${isPrelim(r) ? 'Preliminary round' : 'Elimination round (not in standings)'} · ${r.published ? 'published to competitors' : 'not yet published'}</div>
+      </div>
+      <div class="publish-actions">
+        <button type="button" class="btn-secondary" data-act="delete">Delete</button>
+        <button type="button" class="btn-primary" style="width:auto;" data-act="publish" ${r.published ? 'disabled' : ''}>
+          ${r.published ? 'Published' : 'Publish results to competitors'}
+        </button>
+      </div>`;
+    card.querySelector('[data-act=delete]').addEventListener('click', e => withBusy(e.currentTarget, () => deleteRound(r.id, r.round_name)));
+    card.querySelector('[data-act=publish]').addEventListener('click', e => withBusy(e.currentTarget, () => publishRound(r.id, r.round_name)));
+    container.appendChild(card);
+  });
+}
+
+// ---- competition settings ----
+function renderSettingsForm(){
+  $('set-brief-weight').value = pct(settings.brief_weight);
+  $('set-qf-teams').value = settings.qf_teams;
+  $('set-individual-seats').value = settings.individual_seats;
+  $('set-score-min').value = settings.score_min;
+  $('set-score-max').value = settings.score_max;
+}
+
+async function saveSettings(){
+  let supabase;
+  try { supabase = getSupabase(); } catch (e) { setStatus('settings-org-status', e.message, true); return; }
+
+  const next = {
+    brief_weight: Number($('set-brief-weight').value) / 100,
+    qf_teams: Number($('set-qf-teams').value),
+    individual_seats: Number($('set-individual-seats').value),
+    score_min: Number($('set-score-min').value),
+    score_max: Number($('set-score-max').value)
+  };
+  if (!(next.brief_weight >= 0 && next.brief_weight <= 1)) { setStatus('settings-org-status', 'Brief weight must be between 0 and 100 percent.', true); return; }
+  if (!Number.isInteger(next.qf_teams) || next.qf_teams < 0 || !Number.isInteger(next.individual_seats) || next.individual_seats < 0) {
+    setStatus('settings-org-status', 'Team and seat counts must be whole numbers.', true); return;
+  }
+  if (!(next.score_min < next.score_max)) { setStatus('settings-org-status', 'The lowest ballot score must be below the highest.', true); return; }
+
+  const { error } = await supabase.from('competition_settings').update(next).eq('id', 1);
+  if (error) { setStatus('settings-org-status', 'Could not save settings: ' + error.message + ' (has supabase-migration.sql been run?)', true); return; }
+
+  settings = { ...settings, ...next };
+  setStatus('settings-org-status', 'Settings saved.');
+  renderStandings();
+  loadScoringRound();
+}
+
+// ---- live standings (organizers only; includes unpublished rounds) ----
+function renderStandings(){
+  const body = $('standings-body');
+  const st = scoring.standings({ rounds: org.rounds, ballots: org.ballots, teams: org.teams, profiles: org.competitors, settings, includeUnpublished: true });
+
+  if (!st.advocates.length) {
+    body.innerHTML = note('Standings appear once scores are entered for a preliminary round.');
+    return;
+  }
+  const w = pct(settings.brief_weight);
+  const teamRows = st.teams.map(t => `
+    <tr class="${t.qualifies ? 'row-advance' : ''}">
+      <td>${esc(t.place)}</td>
+      <td><span class="team-name">${esc(t.team_name)}</span></td>
+      <td>${esc(fmt1(t.brief))}</td>
+      <td>${esc(fmt1(t.oral))}</td>
+      <td>${esc(fmt1(t.combined))}</td>
+      <td>${t.qualifies ? '<span class="badge published">Advances</span>' : ''}</td>
+    </tr>`).join('');
+  const advRows = st.advocates.map(a => `
+    <tr class="${a.qualifies_with_team || a.individual_seat ? 'row-advance' : ''}">
+      <td>${esc(a.place)}</td>
+      <td>${esc(a.email)}<br><span class="muted">${esc(a.team_name || 'No team')}</span></td>
+      <td>${esc(fmt1(a.brief))}</td>
+      <td>${esc(fmt1(a.oral))} <span class="muted">(${esc(a.rounds)})</span></td>
+      <td>${esc(fmt1(a.combined))}</td>
+      <td>${a.qualifies_with_team ? '<span class="badge published">With team</span>' : a.individual_seat ? '<span class="badge live">Individual seat</span>' : ''}</td>
+    </tr>`).join('');
+
+  body.innerHTML = `
+    <div class="note" style="margin-bottom:12px;">Live view for organizers only — includes unpublished rounds (${esc(st.prelims_published)} of ${esc(st.prelims_total)} preliminary rounds published).
+      Combined = ${esc(w)}% brief + ${esc(100 - w)}% oral average. Top ${esc(settings.qf_teams)} teams advance; ${esc(settings.individual_seats)} individual seat${settings.individual_seats === 1 ? '' : 's'} go to the best remaining advocates. Change these in Competition settings.</div>
+    <h3 class="roster-heading">Teams</h3>
+    <div class="table-scroll"><table class="org-table standings-table">
+      <thead><tr><th>#</th><th>Team</th><th>Brief</th><th>Oral avg</th><th>Combined</th><th></th></tr></thead>
+      <tbody>${teamRows}</tbody></table></div>
+    <h3 class="roster-heading" style="margin-top:18px;">Advocates</h3>
+    <div class="table-scroll"><table class="org-table standings-table">
+      <thead><tr><th>#</th><th>Advocate</th><th>Brief</th><th>Oral avg (rounds)</th><th>Combined</th><th></th></tr></thead>
+      <tbody>${advRows}</tbody></table></div>`;
+}
+
+async function createRound(){
+  let supabase;
+  try { supabase = getSupabase(); } catch (e) { setStatus('round-status-msg', e.message, true); return; }
+
+  const round_name = $('new-round-name').value.trim();
+  const round_date = $('new-round-date').value || null;
+  const prep_room = $('new-round-prep').value.trim() || null;
+  const case_name = $('new-round-case').value.trim() || CASE_NAME;
+  const is_preliminary = $('new-round-prelim').checked;
+
+  if (!round_name) { setStatus('round-status-msg', 'Round name is required.', true); return; }
+
+  // Case-insensitive, so "prelim 1" and "Prelim 1" count as the same round.
+  const { data: existing } = await supabase.from('rounds').select('id').ilike('round_name', round_name);
+  if (existing && existing.length) {
+    const proceed = confirm(`A round named "${round_name}" already exists. A round can hold multiple rooms — did you mean to use Assign Matchup instead of creating another round? Click OK to create a duplicate anyway, or Cancel to stop.`);
+    if (!proceed) return;
+  }
+
+  let { error } = await supabase.from('rounds').insert({ round_name, round_date, prep_room, case_name, is_preliminary, published: false });
+  if (error && /is_preliminary/.test(error.message)) {
+    // Migration not run yet: fall back to the old shape so the round still gets created.
+    ({ error } = await supabase.from('rounds').insert({ round_name, round_date, prep_room, case_name, published: false }));
+  }
+  if (error) { setStatus('round-status-msg', 'Could not add round: ' + error.message, true); return; }
+
+  $('new-round-name').value = '';
+  $('new-round-date').value = '';
+  $('new-round-prep').value = '';
+  $('new-round-prelim').checked = true;
+  setStatus('round-status-msg', 'Round added.');
+
+  loadOrganizerData();
+}
+
+async function createTeam(){
+  let supabase;
+  try { supabase = getSupabase(); } catch (e) { setStatus('team-status-msg', e.message, true); return; }
+
+  const team_name = $('new-team-name').value.trim();
+  const comp1 = $('new-team-comp1').value;
+  const comp2 = $('new-team-comp2').value;
+
+  if (!team_name || !comp1 || !comp2) { setStatus('team-status-msg', 'Team name and both competitors are required.', true); return; }
+  if (comp1 === comp2) { setStatus('team-status-msg', 'Pick two different competitors.', true); return; }
+
+  // Warn before quietly moving someone off the team they're already on.
+  const teamsById = {};
+  org.teams.forEach(t => teamsById[t.id] = t);
+  const alreadyPlaced = [comp1, comp2]
+    .map(id => org.competitors.find(c => c.id === id))
+    .filter(c => c && c.team_id && teamsById[c.team_id]);
+  if (alreadyPlaced.length) {
+    const list = alreadyPlaced.map(c => `${c.email} (${teamsById[c.team_id].team_name})`).join(' and ');
+    const verb = alreadyPlaced.length === 1 ? 'is' : 'are';
+    if (!confirm(`${list} ${verb} already on a team. Move them to "${team_name}"? The old team will be left short a member.`)) return;
+  }
+
+  const { data: team, error: teamError } = await supabase
+    .from('teams')
+    .insert({ team_name })
+    .select()
+    .single();
+
+  if (teamError) { setStatus('team-status-msg', 'Could not create team: ' + teamError.message, true); return; }
+
+  const { error: updateError } = await supabase
+    .from('profiles')
+    .update({ team_id: team.id })
+    .in('id', [comp1, comp2]);
+
+  if (updateError) {
+    setStatus('team-status-msg', `"${team_name}" was created, but linking its competitors failed: ${updateError.message}. Remove it from the roster below and try again.`, true);
+    loadOrganizerData();
+    return;
+  }
+
+  $('new-team-name').value = '';
+  setStatus('team-status-msg', 'Team created.');
+
+  loadOrganizerData();
+}
+
+async function deleteTeam(teamId, teamName){
+  let supabase;
+  try { supabase = getSupabase(); } catch (e) { toast(e.message, true); return; }
+
+  if (!confirm(`Remove "${teamName}"? Its competitors will be left without a team, and any matchups already saved for them will keep their old side and room.`)) return;
+
+  const { error: unlinkError } = await supabase.from('profiles').update({ team_id: null }).eq('team_id', teamId);
+  if (unlinkError) { toast('Could not unlink competitors: ' + unlinkError.message, true); return; }
+
+  const { error } = await supabase.from('teams').delete().eq('id', teamId);
+  if (error) { toast('Could not remove team: ' + error.message, true); loadOrganizerData(); return; }
+
+  toast(`Removed "${teamName}".`);
+  loadOrganizerData();
+}
+
+async function setTeamSeed(){
+  let supabase;
+  try { supabase = getSupabase(); } catch (e) { setStatus('seed-status-msg', e.message, true); return; }
+
+  const team_id = $('seed-team-select').value;
+  const seedInput = $('seed-value');
+  const seedRaw = seedInput.value.trim();
+  const briefRaw = $('seed-brief-score').value.trim();
+
+  if (!team_id) { setStatus('seed-status-msg', 'Choose a team first.', true); return; }
+
+  const updates = {};
+  if (seedRaw !== '') {
+    const seed = Number(seedRaw);
+    const min = Number(seedInput.min) || 1;
+    const max = Number(seedInput.max) || Infinity;
+    if (!Number.isInteger(seed) || seed < min || seed > max) {
+      setStatus('seed-status-msg', `Seed must be a whole number from ${min} to ${max}.`, true);
+      return;
+    }
+    updates.seed = seed;
+  }
+  if (briefRaw !== '') {
+    const brief = Number(briefRaw);
+    if (!Number.isFinite(brief) || brief < 0 || brief > 100) { setStatus('seed-status-msg', 'Brief score must be a number from 0 to 100 — it is combined with oral scores on the same scale.', true); return; }
+    updates.brief_score = brief;
+  }
+
+  if (!Object.keys(updates).length) { setStatus('seed-status-msg', 'Enter a seed and/or brief score.', true); return; }
+
+  const { error } = await supabase.from('teams').update(updates).eq('id', team_id);
+  if (error) { setStatus('seed-status-msg', 'Could not save seed: ' + error.message, true); return; }
+
+  seedInput.value = '';
+  $('seed-brief-score').value = '';
+  setStatus('seed-status-msg', 'Saved.');
+
+  loadOrganizerData();
+}
+
+async function saveMatchup(){
+  let supabase;
+  try { supabase = getSupabase(); } catch (e) { setStatus('matchup-status-msg', e.message, true); return; }
+
+  const round_id = $('matchup-round').value;
+  const room = $('matchup-room').value.trim();
+  const call_time = $('matchup-call-time').value.trim();
+  const team_pet = $('matchup-team-pet').value;
+  const team_resp = $('matchup-team-resp').value;
+
+  if (!round_id || !room || !team_pet || !team_resp) {
+    setStatus('matchup-status-msg', 'Round, room, and both teams are required.', true);
+    return;
+  }
+  if (team_pet === team_resp) { setStatus('matchup-status-msg', 'Pick two different teams.', true); return; }
+
+  const { data: members, error: memberError } = await supabase
+    .from('profiles')
+    .select('id, team_id')
+    .in('team_id', [team_pet, team_resp]);
+
+  if (memberError) { setStatus('matchup-status-msg', 'Could not load team members: ' + memberError.message, true); return; }
+
+  // Each team needs exactly two people — checking the combined count would let a 3 + 1 split through.
+  const teamName = id => (org.teams.find(t => t.id === id) || {}).team_name || 'That team';
+  const problems = [];
+  [team_pet, team_resp].forEach(id => {
+    const count = (members || []).filter(m => m.team_id === id).length;
+    if (count !== 2) problems.push(`${teamName(id)} has ${count} competitor${count === 1 ? '' : 's'}`);
+  });
+  if (problems.length) {
+    setStatus('matchup-status-msg', problems.join('; ') + ' — each team needs exactly two. Check Manage Teams.', true);
+    return;
+  }
+
+  // Side balance: every team should argue both sides across the prelims.
+  const counts = sideCounts(round_id);
+  const warnings = [];
+  [[team_pet, 'Petitioner', 'Respondent'], [team_resp, 'Respondent', 'Petitioner']].forEach(([id, side, other]) => {
+    const c = counts[id] || { Petitioner: 0, Respondent: 0 };
+    if (c[side] > c[other]) warnings.push(`${teamName(id)} has already argued ${side} ${c[side]} time${c[side] === 1 ? '' : 's'} and ${other} ${c[other]} time${c[other] === 1 ? '' : 's'}`);
+  });
+  if (warnings.length && !confirm(warnings.join('. ') + '. Save this matchup anyway?')) return;
+
+  const rows = members.map(m => ({
+    round_id,
+    competitor_id: m.id,
+    room,
+    call_time,
+    side: m.team_id === team_pet ? 'Petitioner' : 'Respondent'
+  }));
+
+  const { error: assignError } = await supabase
+    .from('assignments')
+    .upsert(rows, { onConflict: 'round_id,competitor_id' });
+
+  if (assignError) { setStatus('matchup-status-msg', 'Could not save matchup: ' + assignError.message, true); return; }
+
+  $('matchup-room').value = '';
+  $('matchup-call-time').value = '';
+  setStatus('matchup-status-msg', 'Matchup saved.');
+
+  // Show the round that was just edited in the score-entry section.
+  $('scoring-round').value = round_id;
+  loadOrganizerData();
+}
+
+async function publishRound(roundId, roundName){
+  let supabase;
+  try { supabase = getSupabase(); } catch (e) { toast(e.message, true); return; }
+
+  // Check for missing scores before making the round Final.
+  const [assignRes, ballotRes] = await Promise.all([
+    supabase.from('assignments').select('competitor_id').eq('round_id', roundId),
+    supabase.from('ballots').select('competitor_id, judge_1_score, judge_2_score, judge_3_score').eq('round_id', roundId),
+  ]);
+  const assigned = new Set((assignRes.data || []).map(a => a.competitor_id));
+  const complete = new Set((ballotRes.data || [])
+    .filter(b => [b.judge_1_score, b.judge_2_score, b.judge_3_score].every(s => s !== null && s !== undefined))
+    .map(b => b.competitor_id));
+  const missing = [...assigned].filter(id => !complete.has(id)).length;
+
+  let question = `Publish "${roundName}"? Competitors will see their mean score, their place in their room and any judges' feedback for this round.`;
+  if (assignRes.error || ballotRes.error) question = `Could not check whether every score is in. Publish "${roundName}" anyway?`;
+  else if (!assigned.size) question = `No competitors are assigned to "${roundName}" yet. Publish anyway?`;
+  else if (missing) question = `${missing} of ${assigned.size} competitors in "${roundName}" still have missing judge scores. Publish anyway?`;
+  if (!confirm(question)) return;
+
+  const { error } = await supabase.from('rounds').update({ published: true }).eq('id', roundId);
+  if (error) { toast('Could not publish: ' + error.message, true); return; }
+
+  toast(`Published "${roundName}" to competitors.`);
+  loadOrganizerData();
+}
+
+async function deleteRound(roundId, roundName){
+  let supabase;
+  try { supabase = getSupabase(); } catch (e) { toast(e.message, true); return; }
+
+  const confirmed = confirm(`Delete "${roundName}"? This also removes every room assignment and score entered for this round. This cannot be undone.`);
+  if (!confirmed) return;
+
+  const { error } = await supabase.from('rounds').delete().eq('id', roundId);
+  if (error) { toast('Could not delete round: ' + error.message, true); return; }
+
+  toast(`Deleted "${roundName}".`);
+  loadOrganizerData();
+}
+
+// ---- score entry ----
+async function loadScoringRound(){
+  let supabase;
+  try { supabase = getSupabase(); } catch (e) { toast(e.message, true); return; }
+
+  const roundSelect = $('scoring-round');
+  const round_id = roundSelect.value;
+  const roundLabel = roundSelect.selectedOptions[0] ? roundSelect.selectedOptions[0].textContent : '';
+  const container = $('scoring-cards');
+  if (!round_id) { container.innerHTML = ''; return; }
+
+  container.innerHTML = `<div class="card">${note('Loading…')}</div>`;
+
+  const { data: assignments, error: aError } = await supabase
+    .from('assignments')
+    .select('room, call_time, side, competitor_id')
+    .eq('round_id', round_id);
+
+  if (aError) { container.innerHTML = `<div class="card">${note('Could not load assignments: ' + aError.message)}</div>`; return; }
+
+  if (!assignments || !assignments.length) {
+    container.innerHTML = `<div class="card">${note('No competitors assigned to this round yet — use Assign Matchup above.')}</div>`;
+    return;
+  }
+
+  const competitorIds = [...new Set(assignments.map(a => a.competitor_id))];
+  const [profilesRes, ballotsRes] = await Promise.all([
+    supabase.from('profiles').select('id, email, team_id').in('id', competitorIds),
+    supabase.from('ballots').select('competitor_id, judge_1_score, judge_2_score, judge_3_score, feedback').eq('round_id', round_id),
+  ]);
+
+  // If existing scores can't be loaded, don't show blank inputs: a Save would
+  // overwrite real scores with nothing.
+  if (ballotsRes.error) {
+    container.innerHTML = `<div class="card">${note('Could not load the scores already entered for this round (' + ballotsRes.error.message + '). Score entry is paused so nothing gets overwritten — refresh the page to try again.')}</div>`;
+    return;
+  }
+
+  const profilesById = {};
+  (profilesRes.data || []).forEach(p => profilesById[p.id] = p);
+
+  const teamIds = [...new Set((profilesRes.data || []).map(p => p.team_id).filter(Boolean))];
+  const teamsById = {};
+  if (teamIds.length) {
+    const { data: teams } = await supabase.from('teams').select('id, team_name').in('id', teamIds);
+    (teams || []).forEach(t => teamsById[t.id] = t);
+  }
+
+  const ballotMap = {};
+  (ballotsRes.data || []).forEach(b => ballotMap[b.competitor_id] = b);
+
+  const byRoom = {};
+  assignments.forEach(a => {
+    const key = a.room || 'Unassigned room';
+    byRoom[key] = byRoom[key] || [];
+    byRoom[key].push(a);
+  });
+
+  const scoreCell = (judgeKey, value, email, label) => {
+    const v = value === undefined || value === null ? '' : value;
+    return `<td><input type="number" min="${esc(settings.score_min)}" max="${esc(settings.score_max)}" step="1" inputmode="numeric" value="${esc(v)}" data-judge="${judgeKey}" aria-label="${esc(label + ' total for ' + email)}"></td>`;
+  };
+
+  container.innerHTML = '';
+  Object.keys(byRoom).sort().forEach(room => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.round = round_id;
+
+    let rowsHtml = '';
+    byRoom[room].forEach(a => {
+      const p = profilesById[a.competitor_id] || { email: '(unknown)', team_id: null };
+      const team = p.team_id ? teamsById[p.team_id] : null;
+      const b = ballotMap[a.competitor_id] || {};
+      const teamHtml = team ? ` <span style="font-style:italic;font-weight:700;">${esc(team.team_name)}</span>` : '';
+      rowsHtml += `
+        <tr data-competitor="${esc(a.competitor_id)}">
+          <td>${esc(p.email)}${teamHtml}</td>
+          <td>${esc(a.side || '')}</td>
+          ${scoreCell('judge_1_score', b.judge_1_score, p.email, 'Judge 1')}
+          ${scoreCell('judge_2_score', b.judge_2_score, p.email, 'Judge 2')}
+          ${scoreCell('judge_3_score', b.judge_3_score, p.email, 'Judge 3')}
+          <td class="mean-cell">—</td>
+          <td><button type="button" class="btn-secondary save-score" style="padding:6px 12px;">Save</button></td>
+        </tr>
+        <tr class="feedback-row">
+          <td colspan="7"><input type="text" class="feedback-input" value="${esc(b.feedback || '')}" placeholder="Judges' feedback for ${esc(p.email)} (optional — shown to them after publish)" aria-label="Judges' feedback for ${esc(p.email)}"></td>
+        </tr>`;
+    });
+
+    const callTime = byRoom[room][0].call_time ? ' · ' + byRoom[room][0].call_time : '';
+    card.innerHTML = `
+      <h2>Enter Score Reports</h2>
+      <div class="sub">${esc(roundLabel)} · <span class="case-caption">${esc(CASE_NAME)}</span> · ${esc(room + callTime)}</div>
+      <div class="table-scroll">
+        <table class="org-table">
+          <thead><tr><th>Competitor</th><th>Side</th><th>Judge 1</th><th>Judge 2</th><th>Judge 3</th><th class="mean-cell">Mean · room rank</th><th></th></tr></thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+      </div>
+      <div class="status-msg" data-status role="status" aria-live="polite"></div>`;
+    container.appendChild(card);
+    updateRoomStats(card);
+  });
+}
+
+// Recompute the mean and within-room rank for every row of a room card from the input values.
+function updateRoomStats(card){
+  const rows = [...card.querySelectorAll('tr[data-competitor]')].map(tr => {
+    const b = {};
+    tr.querySelectorAll('input[type=number]').forEach(inp => { b[inp.dataset.judge] = inp.value === '' ? null : Number(inp.value); });
+    return { tr, s: scoring.summarize(b) };
+  });
+  const scored = rows.filter(r => r.s).map(r => ({ tr: r.tr, ...r.s }));
+  scoring.rank(scored, scoring.compareRound);
+  rows.forEach(r => {
+    const cell = r.tr.querySelector('.mean-cell');
+    if (!r.s) { cell.textContent = '—'; return; }
+    const ranked = scored.find(x => x.tr === r.tr);
+    cell.innerHTML = `${esc(fmt1(r.s.mean))}<small>${esc(ordinal(ranked.place))} of ${esc(scored.length)}${r.s.n < 3 ? ' · ' + r.s.n + ' of 3 judges' : ''}</small>`;
+  });
+}
+
+async function saveBallotRow(btn, round_id, competitor_id){
+  const card = btn.closest('.card');
+  const statusEl = card.querySelector('[data-status]');
+
+  let supabase;
+  try { supabase = getSupabase(); } catch (e) { setStatus(statusEl, e.message, true); return; }
+
+  const row = btn.closest('tr');
+  const scores = {};
+  for (const inp of row.querySelectorAll('input[type=number]')) {
+    const raw = inp.value.trim();
+    if (raw === '') { scores[inp.dataset.judge] = null; continue; }
+    const n = Number(raw);
+    const min = Number(settings.score_min), max = Number(settings.score_max);
+    if (!Number.isInteger(n) || n < min || n > max) {
+      setStatus(statusEl, `Each judge's total must be a whole number from ${min} to ${max} — enter the total written on the ballot.`, true);
+      inp.focus();
+      return;
+    }
+    scores[inp.dataset.judge] = n;
+  }
+  const feedbackInput = row.nextElementSibling && row.nextElementSibling.querySelector('.feedback-input');
+  const feedback = feedbackInput ? (feedbackInput.value.trim() || null) : null;
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) { setStatus(statusEl, 'You are not signed in.', true); return; }
+
+  const record = {
+    round_id,
+    competitor_id,
+    judge_1_score: scores.judge_1_score,
+    judge_2_score: scores.judge_2_score,
+    judge_3_score: scores.judge_3_score,
+    feedback,
+    entered_by: user.id,
+    updated_at: new Date().toISOString()
+  };
+  let { error } = await supabase.from('ballots').upsert(record, { onConflict: 'round_id,competitor_id' });
+  if (error && /feedback/.test(error.message)) {
+    // Migration not run yet: save the scores without the feedback column.
+    delete record.feedback;
+    ({ error } = await supabase.from('ballots').upsert(record, { onConflict: 'round_id,competitor_id' }));
+    if (!error && feedback) setStatus(statusEl, 'Scores saved, but feedback could not be stored until supabase-migration.sql has been run.', true);
+  }
+  if (error) { setStatus(statusEl, 'Could not save score: ' + error.message, true); return; }
+
+  if (!statusEl.classList.contains('error')) setStatus(statusEl, '');
+  updateRoomStats(card);
+
+  // Keep the live standings in step with what was just saved.
+  const existing = org.ballots.find(b => b.round_id === round_id && b.competitor_id === competitor_id);
+  if (existing) Object.assign(existing, record); else org.ballots.push({ ...record });
+  renderStandings();
+
+  const originalText = btn.textContent;
+  btn.textContent = 'Saved ✓';
+  setTimeout(() => { btn.textContent = originalText; }, 1500);
+}
+
+// ================= wiring ==================
+function init(){
+  // Every element marked data-case-name shows the case name from the header.
+  document.querySelectorAll('[data-case-name]').forEach(el => { el.textContent = CASE_NAME; });
+  $('new-round-case').value = CASE_NAME;
+
+  // Forms submit on Enter, get native required/email validation, and disable their
+  // button while the request is in flight.
+  const actions = { signIn, updatePassword, createRound, createTeam, setTeamSeed, saveMatchup, saveSettings };
+  document.querySelectorAll('form[data-action]').forEach(form => {
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const btn = form.querySelector('button[type=submit]');
+      withBusy(btn, () => actions[form.dataset.action]());
+    });
+  });
+
+  // Score-row Save buttons are created dynamically; one listener covers them all.
+  $('scoring-cards').addEventListener('click', e => {
+    const btn = e.target.closest('button.save-score');
+    if (!btn) return;
+    const tr = btn.closest('tr');
+    const card = btn.closest('.card');
+    withBusy(btn, () => saveBallotRow(btn, card.dataset.round, tr.dataset.competitor));
+  });
+
+  restoreSession();
+}
+init();
+</script>
+
+</body>
+</html>
